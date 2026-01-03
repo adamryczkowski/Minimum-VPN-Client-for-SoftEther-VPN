@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'org.jlleitschuh.gradle.ktlint'
+    id 'jacoco'
 }
 
 android {
@@ -23,6 +24,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            testCoverageEnabled true
+        }
     }
 
     compileOptions {
@@ -38,22 +42,153 @@ android {
         viewBinding true
         buildConfig true
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                useJUnitPlatform()
+            }
+        }
+    }
 }
 
+// Versions
+def versions = [
+    coroutines: '1.10.2',
+    mockk: '1.14.7',
+    junit5: '5.11.4',
+    truth: '1.4.5',
+    androidxTest: '1.6.1',
+    espresso: '3.6.1',
+]
+
 dependencies {
+    // Core Android dependencies
     implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}"
+
+    // === Unit Testing ===
+    // JUnit 5
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.junit5}"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.junit5}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit5}"
+
+    // JUnit 4 support for legacy tests (can be removed after migration)
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${versions.junit5}"
+
+    // MockK - Kotlin mocking library
+    testImplementation "io.mockk:mockk:${versions.mockk}"
+
+    // Coroutines testing
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}"
+
+    // Google Truth - Fluent assertions
+    testImplementation "com.google.truth:truth:${versions.truth}"
+
+    // === Instrumented Testing (Android) ===
+    androidTestImplementation "androidx.test:runner:${versions.androidxTest}"
+    androidTestImplementation "androidx.test:rules:${versions.androidxTest}"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.espresso:espresso-core:${versions.espresso}"
+
+    // MockK for Android instrumented tests
+    androidTestImplementation "io.mockk:mockk-android:${versions.mockk}"
+
+    // Truth for Android tests
+    androidTestImplementation "com.google.truth:truth:${versions.truth}"
+
+    // Coroutines testing for Android
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}"
 }
 
 ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+}
+
+// JaCoCo configuration for code coverage
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.register('jacocoTestReport', JacocoReport) {
+    dependsOn 'testDebugUnitTest'
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+    def fileFilter = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+        '**/databinding/**',
+        '**/android/databinding/*Binding.*',
+    ]
+
+    def debugTree = fileTree(
+        dir: "${buildDir}/tmp/kotlin-classes/debug",
+        excludes: fileFilter
+    )
+
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree]))
+    executionData.setFrom(fileTree(
+        dir: buildDir,
+        includes: [
+            'jacoco/testDebugUnitTest.exec',
+            'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec'
+        ]
+    ))
+}
+
+tasks.register('jacocoTestCoverageVerification', JacocoCoverageVerification) {
+    dependsOn 'jacocoTestReport'
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.60 // 60% coverage threshold
+            }
+        }
+    }
+
+    def fileFilter = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+    ]
+
+    def debugTree = fileTree(
+        dir: "${buildDir}/tmp/kotlin-classes/debug",
+        excludes: fileFilter
+    )
+
+    classDirectories.setFrom(files([debugTree]))
+    executionData.setFrom(fileTree(
+        dir: buildDir,
+        includes: [
+            'jacoco/testDebugUnitTest.exec',
+            'outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec'
+        ]
+    ))
 }
