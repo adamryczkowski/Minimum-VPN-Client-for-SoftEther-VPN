@@ -61,8 +61,44 @@ This document tracks known issues discovered during testing.
 ### Package Attribute in AndroidManifest.xml (Deprecated)
 
 - **Severity:** Low
-- **Status:** Open
+- **Status:** Fixed
 - **Discovered:** 2026-01-03
+- **Fixed:** 2026-01-03
 - **Description:** Setting namespace via package attribute in AndroidManifest.xml is no longer supported
 - **Location:** `app/src/main/AndroidManifest.xml`
-- **Workaround:** Remove `package="kittoku.mvc"` from AndroidManifest.xml (namespace is now set in build.gradle)
+- **Resolution:** Removed `package="kittoku.mvc"` from AndroidManifest.xml (namespace is now set in build.gradle)
+
+---
+
+## Technical Debt
+
+### Detekt Static Analysis Baseline
+
+- **Severity:** Medium
+- **Status:** Open (Baselined)
+- **Discovered:** 2026-01-03
+- **Description:** Detekt static analysis found 166 weighted issues in the codebase. These have been baselined to allow the build to pass while tracking technical debt for incremental improvement.
+- **Location:** `app/detekt-baseline.xml`
+- **Technical Debt Summary:**
+  - **Total Issues:** 166 weighted issues
+  - **Estimated Effort:** 1 day 1 hour 25 minutes
+  - **Breakdown by Category:**
+    - **Style (12h 40min):** Formatting, naming conventions, code style issues
+    - **Exceptions (5h):** Exception handling patterns (SwallowedException, TooGenericExceptionCaught)
+    - **Complexity (4h 20min):** Complex methods, high cyclomatic complexity
+    - **Naming (2h 25min):** Variable/function naming conventions
+    - **Performance (35min):** Performance-related issues (SpreadOperator)
+    - **Potential Bugs (25min):** Code patterns that could lead to bugs
+- **Files with Most Issues:**
+  - `ControlClient.kt` - Complex VPN control logic
+  - `IPTerminal.kt` - IP packet processing
+  - Various preference classes - Exception handling
+- **Resolution Strategy:**
+  1. Address issues incrementally during regular development
+  2. Prioritize potential-bugs and exceptions categories first
+  3. Use `just detekt-report` to generate detailed HTML report
+  4. New code must not introduce new detekt issues (baseline only covers existing code)
+- **Commands:**
+  - `just lint-detekt` - Run detekt with baseline
+  - `just detekt-report` - Generate HTML report at `app/build/reports/detekt/`
+  - `just detekt-baseline` - Regenerate baseline (only if intentionally adding issues)

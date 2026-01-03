@@ -1,0 +1,163 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>BracesOnWhenStatements:ControlClient.kt$ControlClient$when</ID>
+    <ID>BracesOnWhenStatements:EthernetFrame.kt$EthernetFrame$when</ID>
+    <ID>BracesOnWhenStatements:OptionPack.kt$OptionPack$when</ID>
+    <ID>BracesOnWhenStatements:PropertyPack.kt$PropertyPack$when</ID>
+    <ID>BracesOnWhenStatements:UDPDatagram.kt$UDPDatagram$when</ID>
+    <ID>CognitiveComplexMethod:ControlClient.kt$ControlClient$internal fun kill(throwable: Throwable?)</ID>
+    <ID>CognitiveComplexMethod:ControlClient.kt$ControlClient$private fun launchJobMain()</ID>
+    <ID>CognitiveComplexMethod:ControlClient.kt$ControlClient$private fun launchJobOutgoing()</ID>
+    <ID>CognitiveComplexMethod:UDPTerminal.kt$UDPTerminal$internal suspend fun receivePacket(): ByteBuffer</ID>
+    <ID>ComplexCondition:UDPTerminal.kt$UDPTerminal$it is Inet4Address &amp;&amp; !it.isAnyLocalAddress &amp;&amp; !it.isLinkLocalAddress &amp;&amp; !it.isLoopbackAddress</ID>
+    <ID>CyclomaticComplexMethod:SoftEtherClient.kt$SoftEtherClient$private fun prepareProperties(): ByteArray</ID>
+    <ID>CyclomaticComplexMethod:UDPTerminal.kt$UDPTerminal$internal suspend fun receivePacket(): ByteBuffer</ID>
+    <ID>ForEachOnRange:HttpMessage.kt$HttpMessage$position() until limit() - 1</ID>
+    <ID>ForEachOnRange:IPv4Packet.kt$IPv4Packet$start until (start + IPv4_HEADER_SIZE) step 2</ID>
+    <ID>ForEachOnRange:UDPDatagram.kt$UDPDatagram$startUdp until (startUdp + udpLength) step 2</ID>
+    <ID>ForEachOnRange:UDPDatagram.kt$UDPDatagram$startUdp until lastByteIndex step 2</ID>
+    <ID>ForEachOnRange:sha0.kt$0..15</ID>
+    <ID>ForEachOnRange:sha0.kt$0..79</ID>
+    <ID>ForEachOnRange:sha0.kt$16..79</ID>
+    <ID>FunctionNaming:sha0.kt$private fun K(t: Int): Int</ID>
+    <ID>FunctionNaming:sha0.kt$private fun S( n: Int, x: Int, ): Int</ID>
+    <ID>FunctionParameterNaming:sha0.kt$B: Int</ID>
+    <ID>FunctionParameterNaming:sha0.kt$C: Int</ID>
+    <ID>FunctionParameterNaming:sha0.kt$D: Int</ID>
+    <ID>ImplicitDefaultLocale:ByteArray.kt$String.format("%02X", byte.toInt() and 0xFF)</ID>
+    <ID>InvalidPackageDeclaration:IPTerminal.kt$package kittoku.mvc.service.terminal.ip</ID>
+    <ID>InvalidPackageDeclaration:TCPTerminal.kt$package kittoku.mvc.service.terminal.tcp</ID>
+    <ID>InvalidPackageDeclaration:UDPTerminal.kt$package kittoku.mvc.service.terminal.udp</ID>
+    <ID>InvalidPackageDeclaration:common.kt$package kittoku.mvc.service.terminal</ID>
+    <ID>InvalidPackageDeclaration:const.kt$package kittoku.mvc.service.terminal.tcp</ID>
+    <ID>InvalidPackageDeclaration:const.kt$package kittoku.mvc.service.terminal.udp</ID>
+    <ID>LabeledExpression:ByteArray.kt$@outer</ID>
+    <ID>LabeledExpression:ByteArray.kt$outer@</ID>
+    <ID>LabeledExpression:ControlClient.kt$ControlClient$@launch</ID>
+    <ID>LabeledExpression:TCPTerminal.kt$TCPTerminal$@consumeFramePack</ID>
+    <ID>LabeledExpression:UDPTerminal.kt$UDPTerminal$@run</ID>
+    <ID>LoopWithTooManyJumpStatements:DhcpClient.kt$DhcpClient$while</ID>
+    <ID>LoopWithTooManyJumpStatements:UDPTerminal.kt$UDPTerminal$while</ID>
+    <ID>MagicNumber:Byte.kt$0x000000FF</ID>
+    <ID>MagicNumber:ByteArray.kt$0xFF</ID>
+    <ID>MagicNumber:ByteArray.kt$15</ID>
+    <ID>MagicNumber:ByteArray.kt$16</ID>
+    <ID>MagicNumber:ClientBridge.kt$ClientBridge$5</ID>
+    <ID>MagicNumber:DhcpClient.kt$DhcpClient$1_000</ID>
+    <ID>MagicNumber:DhcpMessage.kt$DhcpMessage$10</ID>
+    <ID>MagicNumber:DhcpMessage.kt$DhcpMessage$128</ID>
+    <ID>MagicNumber:DhcpMessage.kt$DhcpMessage$64</ID>
+    <ID>MagicNumber:IPv4Packet.kt$IPv4Packet$0b101_111111111</ID>
+    <ID>MagicNumber:IPv4Packet.kt$IPv4Packet$0x0000FFFF</ID>
+    <ID>MagicNumber:Int.kt$0x0000FFFF</ID>
+    <ID>MagicNumber:Int.kt$0x00010000</ID>
+    <ID>MagicNumber:KeepAlivePacket.kt$KeepAlivePacket$10</ID>
+    <ID>MagicNumber:KeepAlivePacket.kt$KeepAlivePacket$12</ID>
+    <ID>MagicNumber:OptionPack.kt$OptionPack$10</ID>
+    <ID>MagicNumber:PropertyPack.kt$PropertyPack$3</ID>
+    <ID>MagicNumber:Short.kt$0x0000FFFF</ID>
+    <ID>MagicNumber:SoftEtherClient.kt$SoftEtherClient$1000</ID>
+    <ID>MagicNumber:SoftEtherClient.kt$SoftEtherClient$2000</ID>
+    <ID>MagicNumber:UDPDatagram.kt$UDPDatagram$0x0000FFFF</ID>
+    <ID>MagicNumber:UDPDatagram.kt$UDPDatagram$3</ID>
+    <ID>MagicNumber:UDPTerminal.kt$UDPTerminal$3</ID>
+    <ID>MagicNumber:UDPTerminal.kt$UDPTerminal$5</ID>
+    <ID>MagicNumber:common.kt$11</ID>
+    <ID>MagicNumber:common.kt$24</ID>
+    <ID>MagicNumber:common.kt$9</ID>
+    <ID>MagicNumber:int.kt$443</ID>
+    <ID>MagicNumber:sha0.kt$0x10325476</ID>
+    <ID>MagicNumber:sha0.kt$0x5A827999</ID>
+    <ID>MagicNumber:sha0.kt$0x67452301</ID>
+    <ID>MagicNumber:sha0.kt$0x6ED9EBA1</ID>
+    <ID>MagicNumber:sha0.kt$14</ID>
+    <ID>MagicNumber:sha0.kt$16</ID>
+    <ID>MagicNumber:sha0.kt$3</ID>
+    <ID>MagicNumber:sha0.kt$30</ID>
+    <ID>MagicNumber:sha0.kt$5</ID>
+    <ID>MagicNumber:sha0.kt$64</ID>
+    <ID>MagicNumber:sha0.kt$8</ID>
+    <ID>MagicNumber:sha0.kt$80</ID>
+    <ID>MagicNumber:sha0.kt$9</ID>
+    <ID>MatchingDeclarationName:constant.kt$MvcPreference</ID>
+    <ID>MaxLineLength:ClientBridge.kt$UDPAccelerationConfig$if</ID>
+    <ID>MaxLineLength:DefaultIntPreference.kt$DefaultIntPreference$internal abstract</ID>
+    <ID>MaxLineLength:EnableSwitchPreference.kt$EnableSwitchPreference$internal abstract</ID>
+    <ID>MaxLineLength:EnableSwitchPreference.kt$SslDoSelectSuitesPreference$internal</ID>
+    <ID>MaxLineLength:MvcTest.kt$MvcTest.HashTests$val actual = hashSha0("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".toByteArray(Charsets.US_ASCII))</ID>
+    <ID>MaxLineLength:NonEmptyStringPreference.kt$HomeHostnamePreference$internal</ID>
+    <ID>MaxLineLength:NonEmptyStringPreference.kt$HomePasswordPreference$internal</ID>
+    <ID>MaxLineLength:NonEmptyStringPreference.kt$HomeUsernamePreference$internal</ID>
+    <ID>MaxLineLength:NonEmptyStringPreference.kt$NonEmptyStringPreference$internal abstract</ID>
+    <ID>MaxLineLength:SoftEtherClient.kt$SoftEtherClient$properties.sepClientProductName = SepClientProductName().also { it.value = "Minimum VPN Client for SoftEther VPN" }</ID>
+    <ID>MaxLineLength:SoftEtherVpnService.kt$SoftEtherVpnService$val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager</ID>
+    <ID>MaxLineLength:SummaryOnlyPreference.kt$EthernetMacAddressPreference$internal</ID>
+    <ID>MaxLineLength:UDPDatagram.kt$UDPDatagram$sum = sum.addOnesComplement(buffer.get(lastByteIndex).toIntAsUByte().shl(Byte.SIZE_BITS))</ID>
+    <ID>MaxLineLength:UDPTerminal.kt$UDPTerminal$if</ID>
+    <ID>MaxLineLength:const.kt$internal val KEEP_ALIVE_NATT_INFO_SIZE = KEEP_ALIVE_NATT_PORT_TAG.size + Short.SIZE_BYTES + KEEP_ALIVE_NATT_IP_TAG.size + 16</ID>
+    <ID>NotImplementedDeclaration:ByteArray.kt$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:DhcpOption.kt$DhcpOption$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:MainActivity.kt$MainActivity.&lt;no name provided&gt;$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:PropertyPack.kt$PropertyPack$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:TCPTerminal.kt$TCPTerminal$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:boolean.kt$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:int.kt$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:set.kt$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:sha0.kt$throw NotImplementedError()</ID>
+    <ID>NotImplementedDeclaration:string.kt$throw NotImplementedError()</ID>
+    <ID>ReturnCount:DhcpClient.kt$DhcpClient$private fun extractMessageToMe(frame: EthernetFrame): DhcpMessage?</ID>
+    <ID>ReturnCount:DhcpClient.kt$DhcpClient$private fun registerDhcpInformation(ack: DhcpMessage): Boolean</ID>
+    <ID>ReturnCount:common.kt$internal fun isEchoFrame(buffer: ByteBuffer): Boolean</ID>
+    <ID>SwallowedException:TCPTerminal.kt$TCPTerminal$e: Exception</ID>
+    <ID>ThrowsCount:SoftEtherClient.kt$SoftEtherClient$private suspend fun uploadProperties()</ID>
+    <ID>TooGenericExceptionCaught:TCPTerminal.kt$TCPTerminal$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:ByteArray.kt$throw Exception("Fragmented Byte")</ID>
+    <ID>TopLevelPropertyNaming:const.kt$internal const val ETHER_TYPE_IPv4: Short = 0x0800</ID>
+    <ID>TopLevelPropertyNaming:const.kt$internal const val IPv4_ADDRESS_SIZE = 4</ID>
+    <ID>TopLevelPropertyNaming:const.kt$internal const val IPv4_CORRECT_CHECKSUM: Short = -1</ID>
+    <ID>TopLevelPropertyNaming:const.kt$internal const val IPv4_DEFAULT_TTL: Byte = Byte.MAX_VALUE</ID>
+    <ID>TopLevelPropertyNaming:const.kt$internal const val IPv4_HEADER_SIZE = 20</ID>
+    <ID>TopLevelPropertyNaming:const.kt$internal const val IPv4_VERSION_AND_HEADER_LENGTH: Byte = 0x45</ID>
+    <ID>UnconditionalJumpStatementInLoop:ARPClient.kt$ARPClient$while (isActive) { val reply = startResolveDefaultGatewaySequence(DHCP_RESEND_MESSAGE_TIMEOUT) ?: continue if (!registerArpInformation(reply)) { throw MvcException(ErrorCode.ARP_INVALID_CONFIGURATION_ASSIGNED, null) } break }</ID>
+    <ID>UnconditionalJumpStatementInLoop:DhcpClient.kt$DhcpClient$while (isActive) { val offer = startDiscoverOfferSequence(DHCP_RESEND_MESSAGE_TIMEOUT) ?: continue val ack = startRequestAckSequence(offer, DHCP_RESEND_MESSAGE_TIMEOUT) ?: continue if (!registerDhcpInformation(ack)) { throw MvcException(ErrorCode.DHCP_INVALID_CONFIGURATION_ASSIGNED, null) } break }</ID>
+    <ID>UnderscoresInNumericLiterals:MvcTest.kt$MvcTest.UdpDatagramTests$1991713114</ID>
+    <ID>UnderscoresInNumericLiterals:MvcTest.kt$MvcTest.UdpDatagramTests$549654713</ID>
+    <ID>UnderscoresInNumericLiterals:const.kt$2097152</ID>
+    <ID>UnnecessaryParentheses:IPv4Packet.kt$IPv4Packet$(start + IPv4_HEADER_SIZE)</ID>
+    <ID>UnnecessaryParentheses:UDPDatagram.kt$UDPDatagram$(startUdp + udpLength)</ID>
+    <ID>UnnecessaryParentheses:sha0.kt$(x.shl(n) or x.ushr(Int.SIZE_BITS - n))</ID>
+    <ID>UnusedPrivateMember:SoftEtherClient.kt$SoftEtherClient$private suspend fun checkSoftEtherServer()</ID>
+    <ID>UnusedPrivateProperty:SslVersionPreference.kt$SslVersionPreference$private val mvcPreference = MvcPreference.SSL_VERSION</ID>
+    <ID>UseCheckOrError:TestClientBridge.kt$TestClientBridge$throw IllegalStateException("TEST_HOST environment variable not set")</ID>
+    <ID>UseCheckOrError:TestClientBridge.kt$TestClientBridge$throw IllegalStateException("TEST_PASSWORD environment variable not set")</ID>
+    <ID>UseCheckOrError:TestClientBridge.kt$TestClientBridge$throw IllegalStateException("TEST_USERNAME environment variable not set")</ID>
+    <ID>UseIfInsteadOfWhen:ControlClient.kt$ControlClient$when (mailbox.receive()) { ControlMessage.SECURE_NAT_ECHO_REQUEST -&gt; arpClient.launchReplyBeacon() else -&gt; throw NotImplementedError() }</ID>
+    <ID>UseIfInsteadOfWhen:IPv4Packet.kt$IPv4Packet$when (protocol) { IP_PROTOCOL_UDP -&gt; payloadUDPDatagram = UDPDatagram().also { it.read(buffer) } else -&gt; payloadUnknown = ByteArray(payloadLength).also { buffer.get(it) } }</ID>
+    <ID>UseIfInsteadOfWhen:UDPDatagram.kt$UDPDatagram$when { srcPort == UDP_PORT_DHCP_SEVER &amp;&amp; dstPort == UDP_PORT_DHCP_CLIENT -&gt; { payloadDhcpMessage = DhcpMessage().also { it.read(buffer) } } else -&gt; payloadUnknown = ByteArray(payloadLength).also { buffer.get(it) } }</ID>
+    <ID>UseIfInsteadOfWhen:set.kt$when (key) { MvcPreference.SSL_SUITES -&gt; setOf&lt;String&gt;() else -&gt; throw NotImplementedError() }</ID>
+    <ID>VariableNaming:sha0.kt$val W = IntArray(80)</ID>
+    <ID>VariableNaming:sha0.kt$var A: Int</ID>
+    <ID>VariableNaming:sha0.kt$var B: Int</ID>
+    <ID>VariableNaming:sha0.kt$var C: Int</ID>
+    <ID>VariableNaming:sha0.kt$var D: Int</ID>
+    <ID>VariableNaming:sha0.kt$var E: Int</ID>
+    <ID>VariableNaming:sha0.kt$var H0: Int = 0x67452301</ID>
+    <ID>VariableNaming:sha0.kt$var H1: Int = 0x10325476.inv() // =0xEFCDAB89</ID>
+    <ID>VariableNaming:sha0.kt$var H2: Int = 0x67452301.inv() // =0x98BADCFE</ID>
+    <ID>VariableNaming:sha0.kt$var H3: Int = 0x10325476</ID>
+    <ID>VariableNaming:sha0.kt$var H4: Int = 0x3C2D1E0F.inv() // =0xC3D2E1F0</ID>
+    <ID>WildcardImport:ClientBridge.kt$import kittoku.mvc.preference.accessor.*</ID>
+    <ID>WildcardImport:ControlClient.kt$import kittoku.mvc.extension.*</ID>
+    <ID>WildcardImport:ControlClient.kt$import kittoku.mvc.unit.ethernet.*</ID>
+    <ID>WildcardImport:ControlClient.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:DhcpClient.kt$import kittoku.mvc.unit.dhcp.*</ID>
+    <ID>WildcardImport:NetworkObserver.kt$import android.net.*</ID>
+    <ID>WildcardImport:SoftEtherClient.kt$import kittoku.mvc.unit.property.*</ID>
+    <ID>WildcardImport:TCPTerminal.kt$import kotlinx.coroutines.*</ID>
+    <ID>WildcardImport:UDPTerminal.kt$import java.net.*</ID>
+    <ID>WildcardImport:UDPTerminal.kt$import kittoku.mvc.extension.*</ID>
+    <ID>WildcardImport:UDPTerminal.kt$import kotlinx.coroutines.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

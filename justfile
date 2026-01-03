@@ -168,13 +168,37 @@ coverage-report:
 
 # === Code Quality ===
 
-# Run ktlint check
-lint:
+# Run all linting (ktlint + detekt)
+lint: lint-ktlint lint-detekt
+    @echo "✅ All linting checks passed"
+
+# Run ktlint check only
+lint-ktlint:
     ./gradlew ktlintCheck
+
+# Run detekt static analysis
+lint-detekt:
+    ./gradlew detekt
 
 # Run ktlint format
 format:
     ./gradlew ktlintFormat
+
+# Generate detekt baseline (for suppressing existing issues)
+detekt-baseline:
+    ./gradlew detektBaseline
+
+# Show detekt report in browser
+detekt-report:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    report="app/build/reports/detekt/detekt.html"
+    if [ -f "$report" ]; then
+        xdg-open "$report" 2>/dev/null || open "$report" 2>/dev/null || echo "Open: $report"
+    else
+        echo "❌ Detekt report not found. Run 'just lint-detekt' first."
+        exit 1
+    fi
 
 # Run all formatting hooks (ktlint + pre-commit formatters)
 format-all: format
