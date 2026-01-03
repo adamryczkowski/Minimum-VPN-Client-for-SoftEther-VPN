@@ -19,7 +19,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
-
 internal class ARPClient(private val bridge: ClientBridge) {
     internal fun launchJobInitial() { // resolve default gateway MAC address
         bridge.scope.launch(bridge.handler) {
@@ -39,13 +38,14 @@ internal class ARPClient(private val bridge: ClientBridge) {
 
     internal fun launchReplyBeacon() {
         bridge.scope.launch(bridge.handler) {
-            val packet = ARPPacket().also {
-                it.opcode = ARP_OPCODE_REPLY
-                it.senderIp.read(bridge.assignedIpAddress)
-                it.senderMac.read(bridge.clientMacAddress)
-                it.targetIp.read(bridge.assignedIpAddress.toBroadcastAddress(bridge.subnetMask))
-                it.targetMac.read(ETHERNET_BROADCAST_ADDRESS)
-            }
+            val packet =
+                ARPPacket().also {
+                    it.opcode = ARP_OPCODE_REPLY
+                    it.senderIp.read(bridge.assignedIpAddress)
+                    it.senderMac.read(bridge.clientMacAddress)
+                    it.targetIp.read(bridge.assignedIpAddress.toBroadcastAddress(bridge.subnetMask))
+                    it.targetMac.read(ETHERNET_BROADCAST_ADDRESS)
+                }
 
             sendAsBroadcast(packet)
         }
@@ -62,12 +62,13 @@ internal class ARPClient(private val bridge: ClientBridge) {
     }
 
     private suspend fun sendAsBroadcast(packet: ARPPacket) {
-        val frame = EthernetFrame().also {
-            it.etherType = ETHER_TYPE_ARP
-            it.dstMac.read(ETHERNET_BROADCAST_ADDRESS)
-            it.srcMac.read(bridge.clientMacAddress)
-            it.payloadARPPacket = packet
-        }
+        val frame =
+            EthernetFrame().also {
+                it.etherType = ETHER_TYPE_ARP
+                it.dstMac.read(ETHERNET_BROADCAST_ADDRESS)
+                it.srcMac.read(bridge.clientMacAddress)
+                it.payloadARPPacket = packet
+            }
 
         bridge.controlChannel.send(frame)
     }
@@ -78,18 +79,21 @@ internal class ARPClient(private val bridge: ClientBridge) {
 
             return if (reply.opcode == ARP_OPCODE_REPLY) {
                 reply
-            } else null
+            } else {
+                null
+            }
         }
     }
 
     private suspend fun startResolveDefaultGatewaySequence(timeout: Long): ARPPacket? {
         return withTimeoutOrNull(timeout) {
-            val packet = ARPPacket().also {
-                it.opcode = ARP_OPCODE_REQUEST
-                it.senderIp.read(bridge.assignedIpAddress)
-                it.senderMac.read(bridge.clientMacAddress)
-                it.targetIp.read(bridge.defaultGatewayIpAddress)
-            }
+            val packet =
+                ARPPacket().also {
+                    it.opcode = ARP_OPCODE_REQUEST
+                    it.senderIp.read(bridge.assignedIpAddress)
+                    it.senderMac.read(bridge.clientMacAddress)
+                    it.targetIp.read(bridge.defaultGatewayIpAddress)
+                }
 
             sendAsBroadcast(packet)
             expectReplyPacket()

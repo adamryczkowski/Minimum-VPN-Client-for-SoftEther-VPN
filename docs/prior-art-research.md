@@ -9,6 +9,7 @@ This document summarizes the research on existing open-source projects that can 
 ## Repositories Cloned
 
 ### 1. SoftEtherVPN (Official)
+
 - **Repository:** https://github.com/SoftEtherVPN/SoftEtherVPN
 - **Location:** `ref/SoftEtherVPN`
 - **Description:** Official SoftEther VPN source code
@@ -17,6 +18,7 @@ This document summarizes the research on existing open-source projects that can 
 - **Purpose:** Reference for understanding the VPN protocol implementation
 
 ### 2. Open-SSTP-Client ⭐ (Recommended Primary Reference)
+
 - **Repository:** https://github.com/kittoku/Open-SSTP-Client
 - **Location:** `ref/Open-SSTP-Client`
 - **Stars:** 485
@@ -35,6 +37,7 @@ This document summarizes the research on existing open-source projects that can 
 - **Why Important:** Most mature and actively maintained Android VPN client that works with SoftEther
 
 ### 3. Minimum-VPN-Client-for-SoftEther-VPN
+
 - **Repository:** https://github.com/kittoku/Minimum-VPN-Client-for-SoftEther-VPN
 - **Location:** `ref/Minimum-VPN-Client-for-SoftEther-VPN`
 - **Stars:** 63
@@ -53,6 +56,7 @@ This document summarizes the research on existing open-source projects that can 
 - **Why Important:** Implements the native SoftEther VPN protocol (not just SSTP)
 
 ### 4. softethervpn-android
+
 - **Repository:** https://github.com/omayanrey/softethervpn-android
 - **Location:** `ref/softethervpn-android`
 - **Stars:** 18
@@ -64,6 +68,7 @@ This document summarizes the research on existing open-source projects that can 
 - **Why Important:** Shows approach to porting native SoftEther code to Android using NDK
 
 ### 5. ZedPass
+
 - **Repository:** https://github.com/CluvexStudio/ZedPass
 - **Location:** `ref/ZedPass`
 - **Stars:** 30
@@ -76,6 +81,7 @@ This document summarizes the research on existing open-source projects that can 
 ## Commercial/Closed-Source References
 
 ### Softether TLS SSL VPN Adapter (Google Play)
+
 - **Developer:** GNUAPP UNIPESSOAL LDA
 - **Downloads:** 10K+
 - **Package:** com.excdev.vpn

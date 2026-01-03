@@ -12,7 +12,6 @@ import java.nio.ByteBuffer
 import java.security.SecureRandom
 import kotlin.math.max
 
-
 internal class KeepAlivePacket : DataUnit {
     internal var value: ByteArray? = null
 
@@ -25,23 +24,25 @@ internal class KeepAlivePacket : DataUnit {
         get() = 2 * Int.SIZE_BYTES + valueLength
 
     internal fun preparePacket(random: SecureRandom) {
-        val minSize = nattAddress?.let {
-            KEEP_ALIVE_NATT_INFO_SIZE
-        } ?: 0
+        val minSize =
+            nattAddress?.let {
+                KEEP_ALIVE_NATT_INFO_SIZE
+            } ?: 0
 
         val randomSize = max(random.nextInt(KEEP_ALIVE_MAX_SIZE + 1), minSize)
 
-        value = random.nextBytes(randomSize).also { array ->
-            nattAddress?.also {
-                val buffer = ByteBuffer.wrap(array)
-                buffer.put(KEEP_ALIVE_NATT_PORT_TAG)
-                buffer.putShort(nattPort.toShort())
-                buffer.put(KEEP_ALIVE_NATT_IP_TAG)
-                buffer.padZeroByte(10)
-                buffer.putShort(-1)
-                buffer.put(it.address)
+        value =
+            random.nextBytes(randomSize).also { array ->
+                nattAddress?.also {
+                    val buffer = ByteBuffer.wrap(array)
+                    buffer.put(KEEP_ALIVE_NATT_PORT_TAG)
+                    buffer.putShort(nattPort.toShort())
+                    buffer.put(KEEP_ALIVE_NATT_IP_TAG)
+                    buffer.padZeroByte(10)
+                    buffer.putShort(-1)
+                    buffer.put(it.address)
+                }
             }
-        }
     }
 
     internal fun extractNATTInfo() {
@@ -70,9 +71,10 @@ internal class KeepAlivePacket : DataUnit {
 
     override fun read(buffer: ByteBuffer) {
         assertAlways(buffer.int == KEEP_ALIVE_FRAME_NUM)
-        value = ByteArray(buffer.int).also {
-            buffer.get(it)
-        }
+        value =
+            ByteArray(buffer.int).also {
+                buffer.get(it)
+            }
     }
 
     override fun write(buffer: ByteBuffer) {

@@ -3,7 +3,6 @@ package kittoku.mvc.unit.property
 import kittoku.mvc.unit.DataUnit
 import java.nio.ByteBuffer
 
-
 internal abstract class SoftEtherProperty : DataUnit {
     internal open val key = ""
     protected abstract val valueType: Int

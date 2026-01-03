@@ -1,4 +1,4 @@
-package kittoku.mvc.service.teminal.tcp
+package kittoku.mvc.service.terminal.tcp
 
 import kittoku.mvc.debug.ErrorCode
 import kittoku.mvc.debug.MvcException
@@ -8,8 +8,8 @@ import kittoku.mvc.extension.capacityAfterPayload
 import kittoku.mvc.extension.move
 import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlMessage
-import kittoku.mvc.service.teminal.isEchoFrame
-import kittoku.mvc.service.teminal.isToMeFrame
+import kittoku.mvc.service.terminal.isEchoFrame
+import kittoku.mvc.service.terminal.isToMeFrame
 import kittoku.mvc.unit.ethernet.ETHERNET_MAC_ADDRESS_SIZE
 import kittoku.mvc.unit.ethernet.ETHER_TYPE_IPv4
 import kittoku.mvc.unit.ethernet.EthernetFrame
@@ -25,16 +25,16 @@ import java.nio.ByteBuffer
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 
-
 internal class TCPTerminal(private val bridge: ClientBridge) {
     private val socket: SSLSocket
     private lateinit var jobKeepAlive: Job
 
-    private val incomingBuffer = ByteBuffer.allocate(16384).also {
-        // discard payload
-        it.position(0)
-        it.limit(0)
-    }
+    private val incomingBuffer =
+        ByteBuffer.allocate(16384).also {
+            // discard payload
+            it.position(0)
+            it.limit(0)
+        }
 
     private val outgoingBuffer = ByteBuffer.allocate(16384)
     private var outgoingFrameNum = 0
@@ -52,10 +52,11 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
         }
 
         if (bridge.doSelectCipherSuites) {
-            socket.enabledCipherSuites = socket.supportedCipherSuites.filter {
-                // the order of suites should be kept
-                bridge.selectedCipherSuites.contains(it)
-            }.toTypedArray()
+            socket.enabledCipherSuites =
+                socket.supportedCipherSuites.filter {
+                    // the order of suites should be kept
+                    bridge.selectedCipherSuites.contains(it)
+                }.toTypedArray()
         }
 
         socket.startHandshake()
@@ -68,15 +69,16 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
     }
 
     internal fun launchJobKeepAlive() {
-        jobKeepAlive = bridge.scope.launch(bridge.handler) {
-            while (isActive) {
-                sendKeepAlive()
+        jobKeepAlive =
+            bridge.scope.launch(bridge.handler) {
+                while (isActive) {
+                    sendKeepAlive()
 
-                (TCP_KEEP_ALIVE_MIN_INTERVAL + bridge.random.nextInt(TCP_KEEP_ALIVE_INTERVAL_DIFF)).toLong().also {
-                    delay(it)
+                    (TCP_KEEP_ALIVE_MIN_INTERVAL + bridge.random.nextInt(TCP_KEEP_ALIVE_INTERVAL_DIFF)).toLong().also {
+                        delay(it)
+                    }
                 }
             }
-        }
     }
 
     private suspend fun sendStream(buffer: ByteBuffer) {
@@ -84,7 +86,7 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
             socket.outputStream.write(
                 buffer.array(),
                 buffer.position(),
-                buffer.remaining()
+                buffer.remaining(),
             )
 
             socket.outputStream.flush()
@@ -103,7 +105,8 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
             }
 
             buffer.limit(buffer.limit() + readLength)
-        } catch (_: SocketTimeoutException) { }
+        } catch (_: SocketTimeoutException) {
+        }
     }
 
     private fun extendStream(buffer: ByteBuffer) {
@@ -133,11 +136,12 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
     }
 
     private suspend fun sendKeepAlive() {
-        val packet = KeepAlivePacket().also {
-            it.nattAddress = bridge.udpAccelerationConfig?.clientNATTAddress
-            it.nattPort = bridge.udpAccelerationConfig?.clientNATTPort ?: 0
-            it.preparePacket(bridge.random)
-        }
+        val packet =
+            KeepAlivePacket().also {
+                it.nattAddress = bridge.udpAccelerationConfig?.clientNATTAddress
+                it.nattPort = bridge.udpAccelerationConfig?.clientNATTPort ?: 0
+                it.preparePacket(bridge.random)
+            }
 
         val buffer = ByteBuffer.allocate(packet.length)
         buffer.clear()
@@ -267,7 +271,7 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
     }
 
     private fun expectValidFrame(): EthernetFrame? {
-        val frame =  EthernetFrame()
+        val frame = EthernetFrame()
         val frameLength = incomingBuffer.int
         val startFrame = incomingBuffer.position()
         val stopFrame = startFrame + frameLength
@@ -277,7 +281,8 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
 
         try {
             frame.read(incomingBuffer)
-        } catch (e: Exception) { // TODO: need notify receiving invalid frame
+        } catch (e: Exception) {
+            // TODO: need notify receiving invalid frame
             incomingBuffer.position(stopFrame) // discard frame
             incomingBuffer.limit(currentLimit)
             return null
@@ -320,7 +325,6 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
             val stopFrame = startFrame + frameLength
             val currentLimit = incomingBuffer.limit()
             incomingBuffer.limit(stopFrame) // avoid frame reading beyond expected length
-
 
             if (isToMeFrame(incomingBuffer, bridge.clientMacAddress)) {
                 incomingBuffer.move(ETHERNET_MAC_ADDRESS_SIZE)

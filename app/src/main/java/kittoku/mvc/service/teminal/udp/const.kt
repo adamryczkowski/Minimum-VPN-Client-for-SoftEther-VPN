@@ -1,5 +1,4 @@
-package kittoku.mvc.service.teminal.udp
-
+package kittoku.mvc.service.terminal.udp
 
 internal const val UDP_CIPHER_ALGORITHM = "ChaCha20-Poly1305"
 internal const val CHACHA20_POLY1305_KEY_SIZE = 32

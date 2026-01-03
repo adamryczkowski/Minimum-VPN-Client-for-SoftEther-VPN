@@ -1,12 +1,12 @@
-package kittoku.mvc.service.teminal.udp
+package kittoku.mvc.service.terminal.udp
 
 import kittoku.mvc.debug.ErrorCode
 import kittoku.mvc.debug.MvcException
 import kittoku.mvc.extension.*
 import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlMessage
-import kittoku.mvc.service.teminal.isEchoFrame
-import kittoku.mvc.service.teminal.isToMeFrame
+import kittoku.mvc.service.terminal.isEchoFrame
+import kittoku.mvc.service.terminal.isToMeFrame
 import kittoku.mvc.unit.ethernet.ETHERNET_MAC_ADDRESS_SIZE
 import kittoku.mvc.unit.ethernet.ETHER_TYPE_IPv4
 import kotlinx.coroutines.*
@@ -18,7 +18,6 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import kotlin.math.max
 import kotlin.math.min
-
 
 internal enum class UDPStatus {
     CLOSED,
@@ -52,17 +51,18 @@ internal class UDPTerminal(private val bridge: ClientBridge) {
     private val regexPort = Regex(UDP_NATT_PORT_REGEX)
 
     init {
-        val address = kotlin.run {
-            NetworkInterface.getNetworkInterfaces().iterator().forEach { nic ->
-                nic.inetAddresses.iterator().forEach {
-                    if (it is Inet4Address && !it.isAnyLocalAddress && !it.isLinkLocalAddress && !it.isLoopbackAddress) {
-                        return@run it
+        val address =
+            kotlin.run {
+                NetworkInterface.getNetworkInterfaces().iterator().forEach { nic ->
+                    nic.inetAddresses.iterator().forEach {
+                        if (it is Inet4Address && !it.isAnyLocalAddress && !it.isLinkLocalAddress && !it.isLoopbackAddress) {
+                            return@run it
+                        }
                     }
                 }
-            }
 
-            throw MvcException(ErrorCode.UDP_NO_AVAILABLE_IP_ADDRESS, null)
-        }
+                throw MvcException(ErrorCode.UDP_NO_AVAILABLE_IP_ADDRESS, null)
+            }
 
         socket = DatagramSocket(0, address)
         socket.receiveBufferSize = UDP_SOCKET_RECEIVE_BUFFER_SIZE
@@ -76,45 +76,50 @@ internal class UDPTerminal(private val bridge: ClientBridge) {
     }
 
     internal fun launchJobKeepAlive() {
-        jobKeepAlive = bridge.scope.launch(bridge.handler) {
-            val buffer = ByteBuffer.allocate(0)
+        jobKeepAlive =
+            bridge.scope.launch(bridge.handler) {
+                val buffer = ByteBuffer.allocate(0)
 
-            while (isActive) {
-                sendData(buffer)
+                while (isActive) {
+                    sendData(buffer)
 
-                (UDP_KEEP_ALIVE_MIN_INTERVAL + bridge.random.nextInt(UDP_KEEP_ALIVE_INTERVAL_DIFF)).toLong().also {
-                    delay(it)
+                    (UDP_KEEP_ALIVE_MIN_INTERVAL + bridge.random.nextInt(UDP_KEEP_ALIVE_INTERVAL_DIFF)).toLong().also {
+                        delay(it)
+                    }
                 }
             }
-        }
     }
 
     internal fun launchJobInquireNATT() {
-        jobInquireNATT = bridge.scope.launch(bridge.handler) {
-            val packet = DatagramPacket(
-                "B".toByteArray(Charsets.US_ASCII),
-                1, config.nattAddress, UDP_NATT_PORT
-            )
+        jobInquireNATT =
+            bridge.scope.launch(bridge.handler) {
+                val packet =
+                    DatagramPacket(
+                        "B".toByteArray(Charsets.US_ASCII),
+                        1, config.nattAddress, UDP_NATT_PORT,
+                    )
 
-            while (isActive) {
-                sendPacket(packet)
+                while (isActive) {
+                    sendPacket(packet)
 
-                val interval = if (config.status == UDPStatus.OPEN) {
-                    UDP_NATT_INTERVAL_MIN + bridge.random.nextInt(UDP_NATT_INTERVAL_DIFF)
-                } else {
-                    UDP_NATT_INTERVAL_INITIAL
+                    val interval =
+                        if (config.status == UDPStatus.OPEN) {
+                            UDP_NATT_INTERVAL_MIN + bridge.random.nextInt(UDP_NATT_INTERVAL_DIFF)
+                        } else {
+                            UDP_NATT_INTERVAL_INITIAL
+                        }
+
+                    delay(interval.toLong())
                 }
-
-                delay(interval.toLong())
             }
-        }
     }
 
     private fun expectPacket(): Boolean {
         try {
             socket.receive(incomingPacket)
             return true
-        } catch (_: SocketTimeoutException) { }
+        } catch (_: SocketTimeoutException) {
+        }
 
         return false
     }
@@ -156,7 +161,7 @@ internal class UDPTerminal(private val bridge: ClientBridge) {
                 0,
                 encryptBuffer.position(),
                 packetBuffer.array(),
-                CHACHA20_POLY1305_NONCE_SIZE
+                CHACHA20_POLY1305_NONCE_SIZE,
             ).also {
                 outgoingPacket.length = CHACHA20_POLY1305_NONCE_SIZE + it
             }
@@ -180,9 +185,10 @@ internal class UDPTerminal(private val bridge: ClientBridge) {
     }
 
     private fun processNATTInformation() {
-        val text = incomingPacket.let {
-            it.data.sliceArray(0 until it.length).toStringOrNull(Charsets.US_ASCII)
-        } ?: return
+        val text =
+            incomingPacket.let {
+                it.data.sliceArray(0 until it.length).toStringOrNull(Charsets.US_ASCII)
+            } ?: return
 
         val resultIP = regexIP.find(text)?.value ?: return
         val resultPort = regexPort.find(text)?.value ?: return
@@ -216,14 +222,14 @@ internal class UDPTerminal(private val bridge: ClientBridge) {
             serverCipher.init(
                 Cipher.DECRYPT_MODE,
                 config.serverKey,
-                IvParameterSpec(incomingPacket.data, 0, CHACHA20_POLY1305_NONCE_SIZE)
+                IvParameterSpec(incomingPacket.data, 0, CHACHA20_POLY1305_NONCE_SIZE),
             )
 
             serverCipher.doFinal(
                 incomingPacket.data,
                 CHACHA20_POLY1305_NONCE_SIZE,
                 incomingPacket.length - CHACHA20_POLY1305_NONCE_SIZE,
-                decryptBuffer.array()
+                decryptBuffer.array(),
             ).also {
                 decryptBuffer.position(0)
                 decryptBuffer.limit(it)
@@ -251,11 +257,12 @@ internal class UDPTerminal(private val bridge: ClientBridge) {
                 lastReceivedTick = currentTime
             }
 
-            config.status = if (currentTime - lastReceivedTick > UDP_KEEP_ALIVE_TIMEOUT) {
-                UDPStatus.CLOSED
-            } else {
-                UDPStatus.OPEN
-            }
+            config.status =
+                if (currentTime - lastReceivedTick > UDP_KEEP_ALIVE_TIMEOUT) {
+                    UDPStatus.CLOSED
+                } else {
+                    UDPStatus.OPEN
+                }
 
             val realDataSize = decryptBuffer.short.toIntAsUShort()
 
@@ -267,11 +274,12 @@ internal class UDPTerminal(private val bridge: ClientBridge) {
 
             decryptBuffer.limit(decryptBuffer.position() + realDataSize)
 
-
             // parse frame
             if (isToMeFrame(decryptBuffer, bridge.clientMacAddress)) {
                 decryptBuffer.move(ETHERNET_MAC_ADDRESS_SIZE)
-            } else continue
+            } else {
+                continue
+            }
 
             decryptBuffer.move(ETHERNET_MAC_ADDRESS_SIZE) // ignore sender's MAC address
 

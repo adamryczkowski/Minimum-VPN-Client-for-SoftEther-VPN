@@ -2,8 +2,12 @@ package kittoku.mvc.hash
 
 import java.nio.ByteBuffer
 
-
-private fun f(t: Int, B: Int, C: Int, D: Int): Int {
+private fun f(
+    t: Int,
+    B: Int,
+    C: Int,
+    D: Int,
+): Int {
     return when (t) {
         in 0..19 -> (B and C) or (B.inv() and D)
         in 20..39, in 60..79 -> B xor C xor D
@@ -22,7 +26,10 @@ private fun K(t: Int): Int {
     }
 }
 
-private fun S(n: Int, x: Int): Int {
+private fun S(
+    n: Int,
+    x: Int,
+): Int {
     return (x.shl(n) or x.ushr(Int.SIZE_BITS - n))
 }
 

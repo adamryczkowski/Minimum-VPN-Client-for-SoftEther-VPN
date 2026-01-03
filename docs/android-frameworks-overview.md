@@ -5,6 +5,7 @@
 ## Executive Summary
 
 This document provides an overview of Android development frameworks suitable for building a SoftEther VPN client. Based on research, the frameworks are evaluated for their ability to:
+
 1. Implement Android's VpnService API
 2. Handle low-level networking operations
 3. Provide good user experience
@@ -17,6 +18,7 @@ This document provides an overview of Android development frameworks suitable fo
 **Description:** Google's official modern toolkit for building native Android UI, combined with Kotlin as the primary programming language.
 
 **Pros:**
+
 - ✅ **First-class VpnService support** - Direct access to Android's VpnService API
 - ✅ **Official Google recommendation** for Android development in 2025
 - ✅ **Best performance** - Native code runs directly on the device
@@ -29,17 +31,20 @@ This document provides an overview of Android development frameworks suitable fo
 - ✅ **Long-term support** - Google's primary Android development stack
 
 **Cons:**
+
 - ❌ **Android only** - No code sharing with iOS
 - ❌ **Learning curve** - Requires Android-specific knowledge
 - ❌ **Verbose for simple apps** - More boilerplate than cross-platform solutions
 
 **VPN-Specific Considerations:**
+
 - Direct implementation of `android.net.VpnService`
 - Native TUN interface access via `ParcelFileDescriptor`
 - Full control over socket protection and routing
 - Easy integration with Android's notification system for foreground services
 
 **Reference Implementations:**
+
 - [Open-SSTP-Client](https://github.com/kittoku/Open-SSTP-Client) - 485 stars, MIT license
 - [Minimum-VPN-Client-for-SoftEther-VPN](https://github.com/kittoku/Minimum-VPN-Client-for-SoftEther-VPN) - 63 stars
 - [android-vpn-implementation-guide](https://github.com/satishnada/android-vpn-implementation-guide) - 22 stars
@@ -51,6 +56,7 @@ This document provides an overview of Android development frameworks suitable fo
 **Description:** Google's cross-platform UI toolkit for building natively compiled applications from a single codebase.
 
 **Pros:**
+
 - ✅ **Cross-platform** - Single codebase for Android and iOS
 - ✅ **Hot reload** - Fast development iteration
 - ✅ **Rich widget library** - Beautiful, customizable UI components
@@ -59,6 +65,7 @@ This document provides an overview of Android development frameworks suitable fo
 - ✅ **Existing VPN packages** - `flutter_vpn_service` available on pub.dev
 
 **Cons:**
+
 - ❌ **Platform channels required** - VpnService must be implemented in native Kotlin/Java
 - ❌ **Larger app size** - Flutter runtime adds ~5-10MB to APK
 - ❌ **Limited low-level access** - Networking code still needs native implementation
@@ -66,12 +73,14 @@ This document provides an overview of Android development frameworks suitable fo
 - ❌ **Debugging complexity** - Issues may span Dart and native code
 
 **VPN-Specific Considerations:**
+
 - UI can be built in Flutter/Dart
 - VPN connection logic must use platform channels to native Kotlin
 - `flutter_vpn_service` package provides basic VpnService wrapper
 - Complex protocol implementations (SSTP, SoftEther) still need native code
 
 **Reference Implementations:**
+
 - [ZedPass](https://github.com/CluvexStudio/ZedPass) - Flutter SSTP client, 30 stars
 - [VPNclient-app](https://github.com/VPNclient/VPNclient-app) - Flutter VPN client
 
@@ -82,6 +91,7 @@ This document provides an overview of Android development frameworks suitable fo
 **Description:** Facebook's framework for building native apps using React and JavaScript.
 
 **Pros:**
+
 - ✅ **Cross-platform** - Shared codebase for Android and iOS
 - ✅ **Large ecosystem** - npm packages and React community
 - ✅ **Web developer friendly** - JavaScript/TypeScript skills transfer
@@ -89,6 +99,7 @@ This document provides an overview of Android development frameworks suitable fo
 - ✅ **Mature framework** - Used by major apps (Facebook, Instagram)
 
 **Cons:**
+
 - ❌ **Native modules required** - VpnService must be implemented in native code
 - ❌ **JavaScript bridge overhead** - Performance impact for intensive operations
 - ❌ **Complex native integration** - Bridging VPN logic is non-trivial
@@ -97,6 +108,7 @@ This document provides an overview of Android development frameworks suitable fo
 - ❌ **Not ideal for background services** - VPN services run continuously
 
 **VPN-Specific Considerations:**
+
 - Not recommended for VPN apps due to bridge overhead
 - Background service management is complex
 - Low-level networking requires native modules
@@ -109,6 +121,7 @@ This document provides an overview of Android development frameworks suitable fo
 **Description:** JetBrains' technology for sharing Kotlin code between platforms while keeping native UI.
 
 **Pros:**
+
 - ✅ **Shared business logic** - VPN protocol code can be shared
 - ✅ **Native UI** - Use Jetpack Compose for Android, SwiftUI for iOS
 - ✅ **Kotlin everywhere** - Single language for shared code
@@ -116,12 +129,14 @@ This document provides an overview of Android development frameworks suitable fo
 - ✅ **No runtime overhead** - Compiles to native code
 
 **Cons:**
+
 - ❌ **Newer technology** - Less mature than other options
 - ❌ **Platform-specific VPN code** - VpnService is Android-only
 - ❌ **Smaller community** - Fewer resources and examples
 - ❌ **iOS complexity** - Requires Kotlin/Native knowledge for iOS
 
 **VPN-Specific Considerations:**
+
 - Protocol implementation (SSTP, encryption) can be shared
 - VpnService integration remains platform-specific
 - Good option if iOS support is planned for future
@@ -133,11 +148,13 @@ This document provides an overview of Android development frameworks suitable fo
 **Description:** Using Android NDK to compile C/C++ code, potentially porting SoftEther's existing codebase.
 
 **Pros:**
+
 - ✅ **Code reuse** - Can port existing SoftEther C code
 - ✅ **Maximum performance** - Native machine code
 - ✅ **Protocol compatibility** - Exact same implementation as desktop
 
 **Cons:**
+
 - ❌ **Complex build system** - CMake/NDK configuration is challenging
 - ❌ **Platform-specific issues** - Android has different system calls
 - ❌ **UI still needs Java/Kotlin** - Only networking can be in C
@@ -146,6 +163,7 @@ This document provides an overview of Android development frameworks suitable fo
 - ❌ **Maintenance burden** - Two codebases to maintain
 
 **VPN-Specific Considerations:**
+
 - `softethervpn-android` repository attempted this approach (abandoned)
 - VpnService still requires Kotlin/Java wrapper
 - JNI bridging adds complexity
@@ -158,6 +176,7 @@ This document provides an overview of Android development frameworks suitable fo
 All frameworks must ultimately use Android's VpnService API. Key components:
 
 ### VpnService Class
+
 ```kotlin
 class MyVpnService : VpnService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -167,7 +186,9 @@ class MyVpnService : VpnService() {
 ```
 
 ### VpnService.Builder
+
 Configures the VPN tunnel:
+
 - `addAddress()` - Set VPN interface IP address
 - `addRoute()` - Configure routing
 - `addDnsServer()` - Set DNS servers
@@ -175,11 +196,13 @@ Configures the VPN tunnel:
 - `establish()` - Create the TUN interface
 
 ### TUN Interface
+
 - Returns `ParcelFileDescriptor` for reading/writing IP packets
 - Read: Outgoing packets from device apps
 - Write: Incoming packets from VPN server
 
 ### Required Permissions
+
 ```xml
 <uses-permission android:name="android.permission.INTERNET" />
 <service
@@ -223,6 +246,7 @@ For building a SoftEther VPN client, **Native Kotlin with Jetpack Compose** is t
 ### Alternative: Flutter (if cross-platform is required)
 
 If iOS support is a future requirement, Flutter is a viable alternative:
+
 - Use Flutter for UI
 - Implement VPN logic in native Kotlin via platform channels
 - Reference ZedPass for implementation patterns

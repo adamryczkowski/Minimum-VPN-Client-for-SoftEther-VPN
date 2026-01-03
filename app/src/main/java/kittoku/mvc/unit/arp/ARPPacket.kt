@@ -5,7 +5,6 @@ import kittoku.mvc.unit.DataUnit
 import kittoku.mvc.unit.ethernet.ETHER_TYPE_IPv4
 import java.nio.ByteBuffer
 
-
 internal class ARPPacket : DataUnit {
     internal var opcode: Short = 0
 

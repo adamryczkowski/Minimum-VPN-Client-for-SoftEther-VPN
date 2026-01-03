@@ -3,7 +3,6 @@ package kittoku.mvc.unit.property
 import kittoku.mvc.debug.assertAlways
 import java.nio.ByteBuffer
 
-
 internal open class SoftEtherBytesProperty : SoftEtherProperty() {
     override val valueType = SEP_BYTES_TYPE
     override val valueNum = 1
@@ -29,9 +28,12 @@ internal open class SoftEtherBytesProperty : SoftEtherProperty() {
         val size = buffer.int
         assertAlways(size >= 0)
 
-        value = if(size > 0) {
-            ByteArray(size).also { buffer.get(it) }
-        } else null
+        value =
+            if (size > 0) {
+                ByteArray(size).also { buffer.get(it) }
+            } else {
+                null
+            }
     }
 }
 

@@ -1,5 +1,4 @@
-package kittoku.mvc.service.teminal.tcp
-
+package kittoku.mvc.service.terminal.tcp
 
 internal const val TCP_CONTROL_UNIT_WAIT_TIMEOUT = 10
 internal const val TCP_DATA_UNIT_WAIT_TIMEOUT = 1_000

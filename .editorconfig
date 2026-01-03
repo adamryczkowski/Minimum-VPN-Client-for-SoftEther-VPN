@@ -1,0 +1,55 @@
+# EditorConfig for SoftEther Connect
+# See: https://editorconfig.org/
+# ktlint rules: https://pinterest.github.io/ktlint/latest/rules/standard/
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+# Kotlin-specific settings
+indent_size = 4
+max_line_length = off
+
+# ktlint rules configuration
+# Disable max line length check (existing codebase has long lines)
+ktlint_standard_max-line-length = disabled
+# Disable strict file naming (existing codebase uses lowercase)
+ktlint_standard_filename = disabled
+
+# Disable wildcard import check (existing codebase uses them extensively)
+ktlint_standard_no-wildcard-imports = disabled
+
+# Disable property naming check (existing codebase has non-standard names)
+ktlint_standard_property-naming = disabled
+
+# Disable function naming check (existing codebase has non-standard names)
+ktlint_standard_function-naming = disabled
+
+# Disable package naming check
+ktlint_standard_package-name = disabled
+
+[*.xml]
+indent_size = 4
+
+[*.{yaml,yml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.gradle]
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+[justfile]
+indent_style = space
+indent_size = 4

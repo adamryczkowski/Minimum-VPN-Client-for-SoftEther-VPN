@@ -7,7 +7,6 @@ import kittoku.mvc.unit.arp.ARP_HARDWARE_TYPE_ETHERNET
 import kittoku.mvc.unit.ip.IPv4Packet
 import java.nio.ByteBuffer
 
-
 internal class EthernetFrame : DataUnit {
     internal val dstMac = ByteArray(ETHERNET_MAC_ADDRESS_SIZE)
     internal val srcMac = ByteArray(ETHERNET_MAC_ADDRESS_SIZE)

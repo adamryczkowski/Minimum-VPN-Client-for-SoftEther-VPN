@@ -5,8 +5,8 @@ import kittoku.mvc.hash.hashSha0
 import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlClient
 import kittoku.mvc.service.client.UDPAccelerationConfig
-import kittoku.mvc.service.teminal.udp.UDP_NATT_IP_REGEX
-import kittoku.mvc.service.teminal.udp.UDP_NATT_PORT_REGEX
+import kittoku.mvc.service.terminal.udp.UDP_NATT_IP_REGEX
+import kittoku.mvc.service.terminal.udp.UDP_NATT_PORT_REGEX
 import kittoku.mvc.unit.ip.IPv4Packet
 import kittoku.mvc.unit.udp.UDPDatagram
 import kotlinx.coroutines.*
@@ -17,12 +17,12 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
-
 class MvcTest {
     private fun createTestBridge(scope: CoroutineScope): ClientBridge {
-        val handler = CoroutineExceptionHandler { _, exception ->
-            throw exception
-        }
+        val handler =
+            CoroutineExceptionHandler { _, exception ->
+                throw exception
+            }
 
         return ClientBridge(scope, handler).also {
             it.isTest = true
@@ -107,7 +107,10 @@ class MvcTest {
         }
     }
 
-    private fun modifyPseudoIPHeader(value: ByteArray, datagram: UDPDatagram) {
+    private fun modifyPseudoIPHeader(
+        value: ByteArray,
+        datagram: UDPDatagram,
+    ) {
         val property = UDPDatagram::class.memberProperties.find { it.name == "pseudoIPHeader" }
 
         @Suppress("UNCHECKED_CAST")
@@ -142,11 +145,12 @@ class MvcTest {
         UDPDatagram().also {
             it.srcPort = 65214
             it.dstPort = 33409
-            it.payloadUnknown = listOf(
-                "35BBF96E035649A57EB582554A292B9A1932553E70930421BF5D207A6DB421717",
-                "CE65F0A76CDD62C926CA9950EAD9FA9925B84066D7E7724CF39F922BA2593855B",
-                "7FDFD2B434"
-            ).reduce { acc, s -> acc + s }.toHexByteArray()
+            it.payloadUnknown =
+                listOf(
+                    "35BBF96E035649A57EB582554A292B9A1932553E70930421BF5D207A6DB421717",
+                    "CE65F0A76CDD62C926CA9950EAD9FA9925B84066D7E7724CF39F922BA2593855B",
+                    "7FDFD2B434",
+                ).reduce { acc, s -> acc + s }.toHexByteArray()
             modifyPseudoIPHeader("29DB7C1FB0CF03F513C4B712".toHexByteArray(), it)
 
             writeReadUDPDatagram(it)

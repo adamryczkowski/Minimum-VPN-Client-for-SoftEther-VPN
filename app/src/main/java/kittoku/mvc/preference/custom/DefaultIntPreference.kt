@@ -9,13 +9,13 @@ import androidx.preference.Preference.SummaryProvider
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.getIntPrefValue
 
-
 internal abstract class DefaultIntPreference(context: Context, attrs: AttributeSet) : EditTextPreference(context, attrs) {
     abstract val mvcPreference: MvcPreference
     abstract val preferenceTitle: String
-    private val provider = SummaryProvider<Preference> {
-        getIntPrefValue(mvcPreference, it.sharedPreferences!!).toString()
-    }
+    private val provider =
+        SummaryProvider<Preference> {
+            getIntPrefValue(mvcPreference, it.sharedPreferences!!).toString()
+        }
 
     override fun onAttached() {
         super.onAttached()

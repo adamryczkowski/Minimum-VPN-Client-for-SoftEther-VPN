@@ -8,7 +8,6 @@ import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
-
 internal class OptionPack : DataUnit {
     internal val unknownOptionTags = mutableListOf<Byte>()
 
@@ -27,13 +26,14 @@ internal class OptionPack : DataUnit {
         get() = 4 + validProperties.map { it.length }.sum() // 4 == MessageType + END
 
     private val validProperties: List<DhcpOption>
-        get() = this::class.memberProperties.filter {
-            it.name.startsWith("option")
-        }.mapNotNull {
-            @Suppress("UNCHECKED_CAST")
-            it as KProperty1<OptionPack, DhcpOption?>
-            it.get(this)
-        }
+        get() =
+            this::class.memberProperties.filter {
+                it.name.startsWith("option")
+            }.mapNotNull {
+                @Suppress("UNCHECKED_CAST")
+                it as KProperty1<OptionPack, DhcpOption?>
+                it.get(this)
+            }
 
     override fun write(buffer: ByteBuffer) {
         DhcpOptionMessageType().also {
@@ -77,7 +77,10 @@ internal class OptionPack : DataUnit {
         assertAlways(messageType.toIntAsUByte() != 0)
     }
 
-    private fun importOption(option: DhcpOption, buffer: ByteBuffer) {
+    private fun importOption(
+        option: DhcpOption,
+        buffer: ByteBuffer,
+    ) {
         val targetPropertyName = "option" + option::class.simpleName!!.substring(10)
         val kProperty = this::class.memberProperties.first { it.name == targetPropertyName }
 

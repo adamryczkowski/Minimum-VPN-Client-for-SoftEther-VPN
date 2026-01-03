@@ -29,6 +29,7 @@ src/
 #### 1. Client Structure (`Client.h`)
 
 The main `CLIENT` structure contains:
+
 - `AccountList` - List of VPN connection accounts
 - `Config` - Client configuration settings
 - `Cedar` - Reference to the Cedar networking core
@@ -37,6 +38,7 @@ The main `CLIENT` structure contains:
 #### 2. Account Structure
 
 Each VPN connection is represented by an `ACCOUNT`:
+
 - `ClientOption` - Connection options (host, port, hub name, etc.)
 - `ClientAuth` - Authentication data (username, password, certificates)
 - `ServerCert` - Server certificate for verification
@@ -45,6 +47,7 @@ Each VPN connection is represented by an `ACCOUNT`:
 #### 3. Client Options (`CLIENT_OPTION`)
 
 Key connection parameters:
+
 - `Hostname` - VPN server hostname
 - `Port` - Connection port (typically 443 for HTTPS/SSTP)
 - `PortUDP` - UDP port for acceleration
@@ -57,6 +60,7 @@ Key connection parameters:
 #### 4. Authentication Types (`CLIENT_AUTH`)
 
 Supported authentication methods:
+
 - Password authentication (hashed or plain)
 - Certificate authentication (X.509)
 - Secure device authentication (smart cards)
@@ -64,6 +68,7 @@ Supported authentication methods:
 #### 5. Connection Structure (`CONNECTION`)
 
 Manages the active VPN connection:
+
 - `Protocol` - Connection protocol
 - `Tcp/Udp` - Transport layer structures
 - `ReceivedBlocks/SendBlocks` - Data queues
@@ -73,6 +78,7 @@ Manages the active VPN connection:
 #### 6. Session Structure (`SESSION`)
 
 Represents an active VPN session:
+
 - `ClientOption/ClientAuth` - Connection parameters
 - `PacketAdapter` - Interface to virtual network adapter
 - `Traffic` - Traffic statistics
@@ -104,21 +110,25 @@ SoftEther supports multiple VPN protocols:
 ## Connection Flow
 
 ### 1. Initialization
+
 ```
 CtStartClient() → CiNewClient() → CiLoadConfigurationFile()
 ```
 
 ### 2. Connection Establishment
+
 ```
 CcConnect() → CtConnect() → NewClientSession() → ClientThread()
 ```
 
 ### 3. Session Management
+
 ```
 SessionConnect() → ClientConnect() → [Protocol Negotiation] → SessionMain()
 ```
 
 ### 4. Data Transfer
+
 ```
 PacketAdapter.GetNextPacket() → [Encrypt/Compress] → ConnectionSend()
 ConnectionReceive() → [Decrypt/Decompress] → PacketAdapter.PutPacket()
@@ -158,6 +168,7 @@ kittoku.osc/
 #### 1. VpnService (`SstpVpnService.kt`)
 
 Extends `android.net.VpnService`:
+
 - Manages VPN lifecycle (connect/disconnect)
 - Handles foreground service notifications
 - Manages reconnection logic
@@ -166,6 +177,7 @@ Extends `android.net.VpnService`:
 #### 2. Controller (`Controller.kt`)
 
 Orchestrates the connection:
+
 - Initializes SSL terminal
 - Manages SSTP client
 - Handles PPP negotiation (LCP, Authentication, IPCP)
@@ -254,32 +266,38 @@ Based on the analysis, the recommended approach is:
 ### Option A: Extend Open-SSTP-Client (Recommended)
 
 **Pros:**
+
 - Already implements SSTP protocol (works with SoftEther)
 - Mature, tested codebase
 - MIT license allows modification
 - Kotlin/Android native
 
 **Cons:**
+
 - Only supports SSTP protocol
 - May need updates for newer Android versions
 
 ### Option B: Implement Native SoftEther Protocol
 
 **Pros:**
+
 - Full protocol support including UDP acceleration
 - Best performance
 
 **Cons:**
+
 - Complex protocol implementation
 - Less documentation than SSTP
 
 ### Option C: Use NDK with SoftEther C Code
 
 **Pros:**
+
 - Reuse existing C codebase
 - Full protocol compatibility
 
 **Cons:**
+
 - Complex build system
 - Platform-specific issues
 - Larger APK size
@@ -294,6 +312,7 @@ For connecting to a family SoftEther VPN server, the **SSTP protocol** approach 
 4. The protocol is well-documented and stable
 
 The implementation should:
+
 1. Use Open-SSTP-Client as a foundation
 2. Add any missing features (profile management, etc.)
 3. Update for latest Android API requirements

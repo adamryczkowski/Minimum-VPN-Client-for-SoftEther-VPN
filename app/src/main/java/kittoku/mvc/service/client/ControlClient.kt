@@ -11,22 +11,20 @@ import kittoku.mvc.extension.*
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.setBooleanPrefValue
 import kittoku.mvc.service.CHANNEL_ID
-import kittoku.mvc.service.client.*
 import kittoku.mvc.service.client.arp.ARPClient
 import kittoku.mvc.service.client.dhcp.DhcpClient
 import kittoku.mvc.service.client.softether.SoftEtherClient
 import kittoku.mvc.service.client.stateless.LogWriter
 import kittoku.mvc.service.client.stateless.NetworkObserver
-import kittoku.mvc.service.teminal.ip.IPTerminal
-import kittoku.mvc.service.teminal.tcp.TCPTerminal
-import kittoku.mvc.service.teminal.udp.UDPStatus
-import kittoku.mvc.service.teminal.udp.UDPTerminal
+import kittoku.mvc.service.terminal.ip.IPTerminal
+import kittoku.mvc.service.terminal.tcp.TCPTerminal
+import kittoku.mvc.service.terminal.udp.UDPStatus
+import kittoku.mvc.service.terminal.udp.UDPTerminal
 import kittoku.mvc.unit.ethernet.*
 import kittoku.mvc.unit.http.HttpMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-
 
 internal class ControlClient(private val bridge: ClientBridge) {
     private lateinit var tcpTerminal: TCPTerminal
@@ -60,177 +58,174 @@ internal class ControlClient(private val bridge: ClientBridge) {
     }
 
     private fun launchJobMain() {
-        jobMain = bridge.scope.launch(bridge.handler) {
-            logWriter?.report("Connecting has been attempted")
+        jobMain =
+            bridge.scope.launch(bridge.handler) {
+                logWriter?.report("Connecting has been attempted")
 
-            tcpTerminal = TCPTerminal(bridge)
+                tcpTerminal = TCPTerminal(bridge)
 
-            bridge.udpAccelerationConfig?.also {
-                it.initializeNATTAddress()
-                udpTerminal = UDPTerminal(bridge)
-            }
-
-            ipTerminal = IPTerminal(bridge)
-
-
-            // SoftEther negotiation
-            softEtherClient = SoftEtherClient(bridge).also { it.launchJobNegotiation() }
-
-            launchJobControlUnit()
-
-            withTimeoutOrNull(SOFTETHER_NEGOTIATION_TIMEOUT) {
-                repeat(2) {
-                    relaySoftEtherMessage()
+                bridge.udpAccelerationConfig?.also {
+                    it.initializeNATTAddress()
+                    udpTerminal = UDPTerminal(bridge)
                 }
 
-                assertAlways(mailbox.receive() == ControlMessage.SOFTETHER_NEGOTIATION_FINISHED)
-                bridge.softEtherChannel.clear()
-            } ?: throw MvcException(ErrorCode.SOFTETHER_NEGOTIATION_TIMEOUT, null)
+                ipTerminal = IPTerminal(bridge)
 
+                // SoftEther negotiation
+                softEtherClient = SoftEtherClient(bridge).also { it.launchJobNegotiation() }
 
-            // start to keep alive tcp
-            tcpTerminal.launchJobKeepAlive()
+                launchJobControlUnit()
 
+                withTimeoutOrNull(SOFTETHER_NEGOTIATION_TIMEOUT) {
+                    repeat(2) {
+                        relaySoftEtherMessage()
+                    }
 
-            // DHCP negotiation
-            dhcpClient = DhcpClient(bridge).also { it.launchJobInitial() }
+                    assertAlways(mailbox.receive() == ControlMessage.SOFTETHER_NEGOTIATION_FINISHED)
+                    bridge.softEtherChannel.clear()
+                } ?: throw MvcException(ErrorCode.SOFTETHER_NEGOTIATION_TIMEOUT, null)
 
-            withTimeoutOrNull(DHCP_NEGOTIATION_TIMEOUT) {
+                // start to keep alive tcp
+                tcpTerminal.launchJobKeepAlive()
+
+                // DHCP negotiation
+                dhcpClient = DhcpClient(bridge).also { it.launchJobInitial() }
+
+                withTimeoutOrNull(DHCP_NEGOTIATION_TIMEOUT) {
+                    while (isActive) {
+                        relayDhcpMessage()
+
+                        if (mailbox.tryReceive().getOrNull() == ControlMessage.DHCP_NEGOTIATION_FINISHED) {
+                            bridge.dhcpChannel.clear()
+                            break
+                        }
+                    }
+                } ?: throw MvcException(ErrorCode.DHCP_NEGOTIATION_TIMEOUT, null)
+
+                // ARP negotiation
+                arpClient = ARPClient(bridge).also { it.launchJobInitial() }
+
+                withTimeoutOrNull(ARP_NEGOTIATION_TIMEOUT) {
+                    while (isActive) {
+                        relayAprPacket()
+
+                        if (mailbox.tryReceive().getOrNull() == ControlMessage.ARP_NEGOTIATION_FINISHED) {
+                            bridge.arpChannel.clear()
+                            break
+                        }
+                    }
+                } ?: throw MvcException(ErrorCode.ARP_NEGOTIATION_TIMEOUT, null)
+
+                // if this is test, we need to get out because VpnService.Builder is not given
+                if (bridge.isTest) {
+                    return@launch
+                }
+
+                // start observing network
+                networkObserver = NetworkObserver(bridge)
+
+                // Establish VPN connection
+                tcpTerminal.setTimeoutForData()
+                ipTerminal.initializeBuilder()
+                ipTerminal.launchJobRetrieve()
+                launchJobOutgoing()
+                launchJobTCPIncoming()
+                bridge.udpAccelerationConfig?.also {
+                    launchJobUDPIncoming()
+                }
+
+                logWriter?.report("VPN connection has been established")
+
+                // routine processing control messages
                 while (isActive) {
-                    relayDhcpMessage()
-
-                    if (mailbox.tryReceive().getOrNull() == ControlMessage.DHCP_NEGOTIATION_FINISHED) {
-                        bridge.dhcpChannel.clear()
-                        break
+                    when (mailbox.receive()) {
+                        ControlMessage.SECURE_NAT_ECHO_REQUEST -> arpClient.launchReplyBeacon()
+                        else -> throw NotImplementedError()
                     }
                 }
-            } ?: throw MvcException(ErrorCode.DHCP_NEGOTIATION_TIMEOUT, null)
-
-
-            // ARP negotiation
-            arpClient = ARPClient(bridge).also { it.launchJobInitial() }
-
-            withTimeoutOrNull(ARP_NEGOTIATION_TIMEOUT) {
-                while (isActive) {
-                    relayAprPacket()
-
-                    if (mailbox.tryReceive().getOrNull() == ControlMessage.ARP_NEGOTIATION_FINISHED) {
-                        bridge.arpChannel.clear()
-                        break
-                    }
-                }
-            } ?: throw MvcException(ErrorCode.ARP_NEGOTIATION_TIMEOUT, null)
-
-
-            // if this is test, we need to get out because VpnService.Builder is not given
-            if (bridge.isTest) {
-                return@launch
             }
-
-
-            // start observing network
-            networkObserver = NetworkObserver(bridge)
-
-
-            // Establish VPN connection
-            tcpTerminal.setTimeoutForData()
-            ipTerminal.initializeBuilder()
-            ipTerminal.launchJobRetrieve()
-            launchJobOutgoing()
-            launchJobTCPIncoming()
-            bridge.udpAccelerationConfig?.also {
-                launchJobUDPIncoming()
-            }
-
-            logWriter?.report("VPN connection has been established")
-
-
-            // routine processing control messages
-            while (isActive) {
-                when (mailbox.receive()) {
-                    ControlMessage.SECURE_NAT_ECHO_REQUEST -> arpClient.launchReplyBeacon()
-                    else -> throw NotImplementedError()
-                }
-            }
-        }
     }
 
     private fun launchJobControlUnit() {
-        jobControlUnit = bridge.scope.launch(bridge.handler) {
-            while (isActive) {
-                when (val received = bridge.controlChannel.receive()) {
-                    is HttpMessage -> {
-                        tcpTerminal.sendHttpMessage(received)
-                    }
+        jobControlUnit =
+            bridge.scope.launch(bridge.handler) {
+                while (isActive) {
+                    when (val received = bridge.controlChannel.receive()) {
+                        is HttpMessage -> {
+                            tcpTerminal.sendHttpMessage(received)
+                        }
 
-                    is EthernetFrame -> {
-                        tcpTerminal.sendFrame(received)
-                    }
+                        is EthernetFrame -> {
+                            tcpTerminal.sendFrame(received)
+                        }
 
-                    else -> throw NotImplementedError()
+                        else -> throw NotImplementedError()
+                    }
                 }
             }
-        }
     }
 
     private fun launchJobTCPIncoming() {
-        jobTCPIncoming = bridge.scope.launch(bridge.handler) {
-            while (isActive) {
-                tcpTerminal.consumeIPPacketBuffer {
-                    ipTerminal.feedIncomingPacket(it)
+        jobTCPIncoming =
+            bridge.scope.launch(bridge.handler) {
+                while (isActive) {
+                    tcpTerminal.consumeIPPacketBuffer {
+                        ipTerminal.feedIncomingPacket(it)
+                    }
                 }
             }
-        }
     }
 
     private fun launchJobUDPIncoming() {
-        jobUDPIncoming = bridge.scope.launch(bridge.handler) {
-            udpTerminal!!.launchJobKeepAlive()
-            udpTerminal!!.launchJobInquireNATT()
+        jobUDPIncoming =
+            bridge.scope.launch(bridge.handler) {
+                udpTerminal!!.launchJobKeepAlive()
+                udpTerminal!!.launchJobInquireNATT()
 
-            while (isActive) {
-                udpTerminal!!.receivePacket().also {
-                    ipTerminal.feedIncomingPacket(it)
+                while (isActive) {
+                    udpTerminal!!.receivePacket().also {
+                        ipTerminal.feedIncomingPacket(it)
+                    }
                 }
             }
-        }
     }
 
     private fun launchJobOutgoing() {
-        jobOutgoing = bridge.scope.launch(bridge.handler) {
-            var lastUDPStatus = UDPStatus.CLOSED
-
-            while (isActive) {
-                val firstPacket = ipTerminal.waitOutgoingPacket()
-
-                // send through UDP hole if possible
-                if (udpTerminal != null) {
-                    val currentUDPStatus = bridge.udpAccelerationConfig!!.status
-
-                    if (currentUDPStatus != lastUDPStatus) {
-                        networkObserver.enforceUpdateSummary()
-                        lastUDPStatus = currentUDPStatus
-                    }
-
-                    if (currentUDPStatus == UDPStatus.OPEN) {
-                        udpTerminal!!.sendData(firstPacket)
-                        continue
-                    }
-                }
-
-                // finally TCP connection is needed
-                tcpTerminal.loadOutgoingPacket(firstPacket)
+        jobOutgoing =
+            bridge.scope.launch(bridge.handler) {
+                var lastUDPStatus = UDPStatus.CLOSED
 
                 while (isActive) {
-                    val polled = ipTerminal.pollOutgoingPacket() ?: break
+                    val firstPacket = ipTerminal.waitOutgoingPacket()
 
-                    val isAddable = tcpTerminal.addOutGoingPacket(polled)
-                    if (!isAddable) break
+                    // send through UDP hole if possible
+                    if (udpTerminal != null) {
+                        val currentUDPStatus = bridge.udpAccelerationConfig!!.status
+
+                        if (currentUDPStatus != lastUDPStatus) {
+                            networkObserver.enforceUpdateSummary()
+                            lastUDPStatus = currentUDPStatus
+                        }
+
+                        if (currentUDPStatus == UDPStatus.OPEN) {
+                            udpTerminal!!.sendData(firstPacket)
+                            continue
+                        }
+                    }
+
+                    // finally TCP connection is needed
+                    tcpTerminal.loadOutgoingPacket(firstPacket)
+
+                    while (isActive) {
+                        val polled = ipTerminal.pollOutgoingPacket() ?: break
+
+                        val isAddable = tcpTerminal.addOutGoingPacket(polled)
+                        if (!isAddable) break
+                    }
+
+                    tcpTerminal.sendOutgoingPacket()
                 }
-
-                tcpTerminal.sendOutgoingPacket()
             }
-        }
     }
 
     private suspend fun relaySoftEtherMessage() {
@@ -255,12 +250,13 @@ internal class ControlClient(private val bridge: ClientBridge) {
     }
 
     private fun notify(message: String) {
-        val builder = NotificationCompat.Builder(bridge.service, CHANNEL_ID).also {
-            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
-            it.priority = NotificationCompat.PRIORITY_DEFAULT
-            it.setAutoCancel(true)
-            it.setStyle(NotificationCompat.BigTextStyle().bigText(message))
-        }
+        val builder =
+            NotificationCompat.Builder(bridge.service, CHANNEL_ID).also {
+                it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+                it.priority = NotificationCompat.PRIORITY_DEFAULT
+                it.setAutoCancel(true)
+                it.setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            }
 
         NotificationManagerCompat.from(bridge.service).also {
             it.notify(0, builder.build())
@@ -275,11 +271,12 @@ internal class ControlClient(private val bridge: ClientBridge) {
                         // report exception first
                         var message = "Disconnected because of "
 
-                        message += if (throwable is MvcException) {
-                            throwable.message
-                        } else {
-                            "UNKNOWN EXCEPTION/ERROR"
-                        }
+                        message +=
+                            if (throwable is MvcException) {
+                                throwable.message
+                            } else {
+                                "UNKNOWN EXCEPTION/ERROR"
+                            }
 
                         notify(message)
                         logWriter?.reportThrowable(throwable)

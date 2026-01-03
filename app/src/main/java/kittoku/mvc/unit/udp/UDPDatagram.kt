@@ -10,7 +10,6 @@ import kittoku.mvc.unit.ip.IP_PROTOCOL_UDP
 import kittoku.mvc.unit.ip.IPv4Packet
 import java.nio.ByteBuffer
 
-
 internal class UDPDatagram : DataUnit { // for only TCP Connection, not UDP acceleration
     internal var srcPort = 0
     internal var dstPort = 0
@@ -50,9 +49,10 @@ internal class UDPDatagram : DataUnit { // for only TCP Connection, not UDP acce
 
         val stopUdp = buffer.position()
 
-        val checksum = pseudoIPHeader?.let {
-            calcChecksum(it, startUdp, buffer)
-        } ?: 0
+        val checksum =
+            pseudoIPHeader?.let {
+                calcChecksum(it, startUdp, buffer)
+            } ?: 0
 
         buffer.position(startChecksum)
         buffer.putShort(checksum)
@@ -70,14 +70,14 @@ internal class UDPDatagram : DataUnit { // for only TCP Connection, not UDP acce
 
         val givenChecksum = buffer.short // discard given checksum
 
-         if (payloadLength > 0) {
-             when {
-                 srcPort == UDP_PORT_DHCP_SEVER && dstPort == UDP_PORT_DHCP_CLIENT -> {
-                     payloadDhcpMessage = DhcpMessage().also { it.read(buffer) }
-                 }
+        if (payloadLength > 0) {
+            when {
+                srcPort == UDP_PORT_DHCP_SEVER && dstPort == UDP_PORT_DHCP_CLIENT -> {
+                    payloadDhcpMessage = DhcpMessage().also { it.read(buffer) }
+                }
 
-                 else -> payloadUnknown = ByteArray(payloadLength).also { buffer.get(it) }
-             }
+                else -> payloadUnknown = ByteArray(payloadLength).also { buffer.get(it) }
+            }
         }
 
         pseudoIPHeader?.also {
@@ -87,7 +87,11 @@ internal class UDPDatagram : DataUnit { // for only TCP Connection, not UDP acce
         }
     }
 
-    private fun calcChecksum(ipHeader: ByteArray, startUdp: Int, buffer: ByteBuffer): Short {
+    private fun calcChecksum(
+        ipHeader: ByteArray,
+        startUdp: Int,
+        buffer: ByteBuffer,
+    ): Short {
         val wrapped = ByteBuffer.wrap(ipHeader)
 
         var sum = 0

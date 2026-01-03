@@ -5,6 +5,7 @@ This document tracks known issues discovered during testing.
 ## Format
 
 ### Issue Title
+
 - **Severity:** Critical/High/Medium/Low
 - **Status:** Open/In Progress/Fixed
 - **Discovered:** Date
@@ -21,6 +22,7 @@ This document tracks known issues discovered during testing.
 ## Issues
 
 ### Deprecated startActivityForResult API
+
 - **Severity:** Low
 - **Status:** Open
 - **Discovered:** 2026-01-03
@@ -29,6 +31,7 @@ This document tracks known issues discovered during testing.
 - **Workaround:** None needed currently, but should migrate to Activity Result API
 
 ### Deprecated stopForeground(Boolean) API
+
 - **Severity:** Low
 - **Status:** Open
 - **Discovered:** 2026-01-03
@@ -37,6 +40,7 @@ This document tracks known issues discovered during testing.
 - **Workaround:** None needed currently, but should migrate to `stopForeground(int)` with STOP_FOREGROUND_REMOVE
 
 ### Java Type Mismatch in NetworkObserver
+
 - **Severity:** Low
 - **Status:** Open
 - **Discovered:** 2026-01-03
@@ -45,6 +49,7 @@ This document tracks known issues discovered during testing.
 - **Workaround:** None needed currently
 
 ### Instance Check Always False (Kotlin 2.4 Breaking Change)
+
 - **Severity:** Medium
 - **Status:** Open
 - **Discovered:** 2026-01-03
@@ -54,6 +59,7 @@ This document tracks known issues discovered during testing.
 - **Reference:** https://youtrack.jetbrains.com/issue/KTLC-365
 
 ### Package Attribute in AndroidManifest.xml (Deprecated)
+
 - **Severity:** Low
 - **Status:** Open
 - **Discovered:** 2026-01-03

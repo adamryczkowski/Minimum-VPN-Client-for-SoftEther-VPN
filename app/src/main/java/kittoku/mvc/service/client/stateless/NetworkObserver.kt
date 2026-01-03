@@ -5,8 +5,7 @@ import androidx.preference.PreferenceManager
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.setStringPrefValue
 import kittoku.mvc.service.client.ClientBridge
-import kittoku.mvc.service.teminal.udp.UDPStatus
-
+import kittoku.mvc.service.terminal.udp.UDPStatus
 
 internal class NetworkObserver(val bridge: ClientBridge) {
     private val manager = bridge.service.getSystemService(ConnectivityManager::class.java)
@@ -16,17 +15,22 @@ internal class NetworkObserver(val bridge: ClientBridge) {
     init {
         wipeStatus()
 
-        val request = NetworkRequest.Builder().let {
-            it.addTransportType(NetworkCapabilities.TRANSPORT_VPN)
-            it.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-            it.build()
-        }
-
-        callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
-                updateSummary(linkProperties)
+        val request =
+            NetworkRequest.Builder().let {
+                it.addTransportType(NetworkCapabilities.TRANSPORT_VPN)
+                it.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                it.build()
             }
-        }
+
+        callback =
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onLinkPropertiesChanged(
+                    network: Network,
+                    linkProperties: LinkProperties,
+                ) {
+                    updateSummary(linkProperties)
+                }
+            }
 
         manager.registerNetworkCallback(request, callback)
     }
@@ -79,7 +83,8 @@ internal class NetworkObserver(val bridge: ClientBridge) {
     internal fun close() {
         try {
             manager.unregisterNetworkCallback(callback)
-        } catch (_: IllegalArgumentException) { } // already unregistered
+        } catch (_: IllegalArgumentException) {
+        } // already unregistered
 
         wipeStatus()
     }

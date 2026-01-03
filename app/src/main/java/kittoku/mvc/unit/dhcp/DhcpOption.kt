@@ -4,7 +4,6 @@ import kittoku.mvc.extension.toIntAsUByte
 import kittoku.mvc.unit.DataUnit
 import java.nio.ByteBuffer
 
-
 internal open class DhcpOption : DataUnit { // as unknown option
     internal open val tag: Byte = 0
 

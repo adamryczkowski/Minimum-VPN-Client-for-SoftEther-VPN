@@ -1,8 +1,8 @@
 # Implementation Plan: Flutter with Native SoftEther Protocol
 
-**Date:** December 25, 2025  
-**Target:** Android 15 (API level 35)  
-**Root Required:** No  
+**Date:** December 25, 2025
+**Target:** Android 15 (API level 35)
+**Root Required:** No
 **Protocol:** Native SoftEther VPN Protocol (via Platform Channels)
 
 ## Executive Summary
@@ -25,6 +25,7 @@ This plan details an alternative approach using Flutter for the UI while impleme
 ## Reference Implementation
 
 The `ZedPass` project (cloned to `ref/ZedPass`) demonstrates Flutter VPN development:
+
 - Uses Flutter for UI
 - Implements SSTP protocol
 - 30 stars, actively maintained
@@ -62,30 +63,35 @@ The `ZedPass` project (cloned to `ref/ZedPass`) demonstrates Flutter VPN develop
 ## Implementation Phases
 
 ### Phase 1: Project Setup (Week 1)
+
 - Create Flutter project
 - Set up platform channels
 - Configure Android module for VpnService
 - Implement basic Flutter UI
 
 ### Phase 2: Platform Channel Bridge (Week 2)
+
 - Define MethodChannel for VPN commands
 - Define EventChannel for status updates
 - Implement Kotlin plugin structure
 - Test bidirectional communication
 
 ### Phase 3: Native VPN Implementation (Weeks 3-5)
+
 - Port/adapt Minimum-VPN-Client code to plugin
 - Implement VpnService in Kotlin
 - Implement SoftEther protocol
 - Implement DHCP and ARP clients
 
 ### Phase 4: Flutter UI (Week 6)
+
 - Implement connection screen
 - Implement settings screen
 - Implement profile management
 - Add state management (Provider/Riverpod)
 
 ### Phase 5: Integration and Testing (Week 7-8)
+
 - Integrate UI with native layer
 - Test connection scenarios
 - Performance optimization
@@ -100,6 +106,7 @@ The `ZedPass` project (cloned to `ref/ZedPass`) demonstrates Flutter VPN develop
 **Description:** VPN operations require continuous data flow between Flutter and native code, which can be complex to manage.
 
 **Mitigation:**
+
 1. Use EventChannel for streaming status updates
 2. Keep VPN logic entirely in native code
 3. Only use Flutter for UI, not for packet processing
@@ -112,6 +119,7 @@ The `ZedPass` project (cloned to `ref/ZedPass`) demonstrates Flutter VPN develop
 **Description:** Platform channel calls have overhead that could impact VPN performance.
 
 **Mitigation:**
+
 1. Minimize channel calls - batch updates
 2. Keep all packet processing in native code
 3. Only send status updates, not packet data, to Flutter
@@ -124,6 +132,7 @@ The `ZedPass` project (cloned to `ref/ZedPass`) demonstrates Flutter VPN develop
 **Description:** Bugs may span Flutter and native code, making debugging harder.
 
 **Mitigation:**
+
 1. Extensive logging on both sides
 2. Test native code independently first
 3. Use Flutter DevTools and Android Studio together
@@ -136,6 +145,7 @@ The `ZedPass` project (cloned to `ref/ZedPass`) demonstrates Flutter VPN develop
 **Description:** Existing Flutter VPN packages may not support SoftEther protocol.
 
 **Mitigation:**
+
 1. Don't rely on existing packages
 2. Implement custom platform channel plugin
 3. Use packages only for UI components
@@ -143,6 +153,7 @@ The `ZedPass` project (cloned to `ref/ZedPass`) demonstrates Flutter VPN develop
 ## Dependencies
 
 ### Flutter (pubspec.yaml)
+
 ```yaml
 dependencies:
   flutter:
@@ -158,6 +169,7 @@ dev_dependencies:
 ```
 
 ### Native Kotlin (build.gradle.kts)
+
 ```kotlin
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
@@ -186,6 +198,7 @@ dependencies {
 4. Native Kotlin with Jetpack Compose provides similar modern UI
 
 **Consider Flutter only if:**
+
 - iOS support is planned for the future
 - You have existing Flutter expertise
 - Cross-platform UI consistency is important

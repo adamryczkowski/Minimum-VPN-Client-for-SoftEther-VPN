@@ -4,7 +4,6 @@ import kittoku.mvc.debug.assertAlways
 import kittoku.mvc.extension.toIntAsUByte
 import java.nio.ByteBuffer
 
-
 internal abstract class DhcpAddressOption : DhcpOption() {
     internal val address = ByteArray(4)
 

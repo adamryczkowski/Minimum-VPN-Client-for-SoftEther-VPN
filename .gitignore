@@ -22,3 +22,9 @@ local.properties
 # Generated files
 *.apk
 *.aab
+
+# Reference repositories (external git repos)
+/ref/
+
+# Local planning documents
+/plans/

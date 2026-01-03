@@ -3,7 +3,6 @@ package kittoku.mvc.unit.property
 import kittoku.mvc.debug.assertAlways
 import java.nio.ByteBuffer
 
-
 internal open class SoftEtherUtf8Property : SoftEtherProperty() {
     override val valueType = SEP_UTF8_TYPE
     override val valueNum = 1

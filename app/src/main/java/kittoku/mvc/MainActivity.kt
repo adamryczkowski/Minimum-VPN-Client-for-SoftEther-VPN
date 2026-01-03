@@ -10,14 +10,12 @@ import kittoku.mvc.fragment.AboutFragment
 import kittoku.mvc.fragment.HomeFragment
 import kittoku.mvc.fragment.SettingFragment
 
-
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         title = "${getText(R.string.app_name_short)}: ${BuildConfig.VERSION_NAME}"
-
 
         object : FragmentStateAdapter(this) {
             private val homeFragment = HomeFragment()
@@ -38,14 +36,14 @@ class MainActivity : AppCompatActivity() {
             binding.pager.adapter = it
         }
 
-
         TabLayoutMediator(binding.tabBar, binding.pager) { tab, position ->
-            tab.text = when (position) {
-                0 -> "HOME"
-                1 -> "SETTING"
-                2 -> "ABOUT"
-                else -> throw NotImplementedError()
-            }
+            tab.text =
+                when (position) {
+                    0 -> "HOME"
+                    1 -> "SETTING"
+                    2 -> "ABOUT"
+                    else -> throw NotImplementedError()
+                }
         }.attach()
     }
 }

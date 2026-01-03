@@ -8,7 +8,6 @@ import kittoku.mvc.unit.arp.ARP_MAC_ADDRESS_SIZE
 import java.nio.ByteBuffer
 import kotlin.math.max
 
-
 internal class DhcpMessage : DataUnit {
     internal var opcode: Byte = 0
     internal var transactionId = 0

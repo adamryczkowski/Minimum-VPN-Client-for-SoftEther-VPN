@@ -8,29 +8,30 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Load environment variables from .env file
 if [ -f "$PROJECT_DIR/.env" ]; then
-    echo "Loading environment from .env file..."
-    set -a
-    source "$PROJECT_DIR/.env"
-    set +a
+	echo "Loading environment from .env file..."
+	set -a
+	# shellcheck source=/dev/null
+	source "$PROJECT_DIR/.env"
+	set +a
 else
-    echo "ERROR: .env file not found. Please copy .env.example to .env and fill in your credentials."
-    exit 1
+	echo "ERROR: .env file not found. Please copy .env.example to .env and fill in your credentials."
+	exit 1
 fi
 
 # Verify required variables are set
 if [ -z "$TEST_HOST" ] || [ "$TEST_HOST" = "your-vpn-server.example.com" ]; then
-    echo "ERROR: TEST_HOST is not set or still has placeholder value"
-    exit 1
+	echo "ERROR: TEST_HOST is not set or still has placeholder value"
+	exit 1
 fi
 
 if [ -z "$TEST_USERNAME" ] || [ "$TEST_USERNAME" = "your-username" ]; then
-    echo "ERROR: TEST_USERNAME is not set or still has placeholder value"
-    exit 1
+	echo "ERROR: TEST_USERNAME is not set or still has placeholder value"
+	exit 1
 fi
 
 if [ -z "$TEST_PASSWORD" ] || [ "$TEST_PASSWORD" = "your-password" ]; then
-    echo "ERROR: TEST_PASSWORD is not set or still has placeholder value"
-    exit 1
+	echo "ERROR: TEST_PASSWORD is not set or still has placeholder value"
+	exit 1
 fi
 
 echo "Running integration tests with:"

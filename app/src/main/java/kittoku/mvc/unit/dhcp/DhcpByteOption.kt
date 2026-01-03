@@ -4,7 +4,6 @@ import kittoku.mvc.debug.assertAlways
 import kittoku.mvc.extension.toIntAsUByte
 import java.nio.ByteBuffer
 
-
 internal abstract class DhcpByteOption : DhcpOption() {
     internal var value: Byte = 0
 

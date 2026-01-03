@@ -44,6 +44,7 @@ See [Manual Testing Checklist](manual-testing-checklist.md)
 ## Build Warnings
 
 The following deprecation warnings were observed during build:
+
 1. `startActivityForResult` deprecated in HomeFragment.kt
 2. `stopForeground(Boolean)` deprecated in ControlClient.kt
 3. Java type mismatch in NetworkObserver.kt

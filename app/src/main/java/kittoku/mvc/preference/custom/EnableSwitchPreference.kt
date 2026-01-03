@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import androidx.preference.SwitchPreferenceCompat
 import kittoku.mvc.preference.MvcPreference
 
-
 internal abstract class EnableSwitchPreference(context: Context, attrs: AttributeSet) : SwitchPreferenceCompat(context, attrs) {
     abstract val mvcPreference: MvcPreference
     abstract val preferenceTitle: String

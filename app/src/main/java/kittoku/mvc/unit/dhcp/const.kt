@@ -1,6 +1,5 @@
 package kittoku.mvc.unit.dhcp
 
-
 internal const val DHCP_HARDWARE_TYPE_ETHERNET: Byte = 1
 
 internal const val DHCP_MAGIC_COOKIE = 0x63825363

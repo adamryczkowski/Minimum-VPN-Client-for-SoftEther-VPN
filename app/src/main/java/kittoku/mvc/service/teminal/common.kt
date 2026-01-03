@@ -1,4 +1,4 @@
-package kittoku.mvc.service.teminal
+package kittoku.mvc.service.terminal
 
 import kittoku.mvc.extension.match
 import kittoku.mvc.service.client.UDP_PORT_ECHO
@@ -6,8 +6,10 @@ import kittoku.mvc.unit.ethernet.ETHERNET_BROADCAST_ADDRESS
 import kittoku.mvc.unit.ip.IP_PROTOCOL_UDP
 import java.nio.ByteBuffer
 
-
-internal fun isToMeFrame(buffer: ByteBuffer, myMacAddress: ByteArray): Boolean {
+internal fun isToMeFrame(
+    buffer: ByteBuffer,
+    myMacAddress: ByteArray,
+): Boolean {
     if (buffer.array().match(myMacAddress, buffer.position())) {
         return true
     }

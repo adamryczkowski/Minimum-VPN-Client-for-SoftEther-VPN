@@ -8,7 +8,6 @@ import java.io.BufferedOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 internal class LogWriter(bridge: ClientBridge) {
     private val outputStream: BufferedOutputStream
     private val mutex = Mutex()
@@ -18,7 +17,7 @@ internal class LogWriter(bridge: ClientBridge) {
 
     init {
         val currentDateTime = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
-        val filename = "log_mvc_${currentDateTime}.txt"
+        val filename = "log_mvc_$currentDateTime.txt"
 
         DocumentFile.fromTreeUri(bridge.service, bridge.logDirectory!!)!!.createFile("text/plain", filename).also {
             outputStream = BufferedOutputStream(bridge.service.contentResolver.openOutputStream(it!!.uri))

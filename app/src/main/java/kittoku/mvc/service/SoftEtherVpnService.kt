@@ -17,17 +17,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
-
 internal class SoftEtherVpnService : VpnService() {
     private var client: ControlClient? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         return if (ACTION_VPN_CONNECT == intent?.action ?: false) {
             client?.kill(null)
-            client = ControlClient(createBridge()).also {
-                beForegrounded()
-                it.run()
-            }
+            client =
+                ControlClient(createBridge()).also {
+                    beForegrounded()
+                    it.run()
+                }
 
             Service.START_STICKY
         } else {
@@ -41,10 +45,11 @@ internal class SoftEtherVpnService : VpnService() {
     private fun createBridge(): ClientBridge {
         val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-        val handler = CoroutineExceptionHandler { _, throwable ->
-            client?.kill(throwable)
-            client = null
-        }
+        val handler =
+            CoroutineExceptionHandler { _, throwable ->
+                client?.kill(throwable)
+                client = null
+            }
 
         val bridge = ClientBridge(scope, handler)
 
@@ -61,13 +66,14 @@ internal class SoftEtherVpnService : VpnService() {
 
         val intent = Intent(this, SoftEtherVpnService::class.java).setAction(ACTION_VPN_DISCONNECT)
         val pendingIntent = PendingIntent.getService(this, 0, intent, 0)
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID).also {
-            it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
-            it.setContentText("Disconnect SoftEther VPN connection")
-            it.priority = NotificationCompat.PRIORITY_DEFAULT
-            it.setContentIntent(pendingIntent)
-            it.setAutoCancel(true)
-        }
+        val builder =
+            NotificationCompat.Builder(this, CHANNEL_ID).also {
+                it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+                it.setContentText("Disconnect SoftEther VPN connection")
+                it.priority = NotificationCompat.PRIORITY_DEFAULT
+                it.setContentIntent(pendingIntent)
+                it.setAutoCancel(true)
+            }
 
         startForeground(1, builder.build())
     }

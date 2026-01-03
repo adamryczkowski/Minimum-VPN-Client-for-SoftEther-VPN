@@ -1,6 +1,5 @@
 package kittoku.mvc.debug
 
-
 internal class AssertException : Exception("") // not as serious as AssertionError
 
 internal fun assertAlways(value: Boolean) {
@@ -9,7 +8,10 @@ internal fun assertAlways(value: Boolean) {
     }
 }
 
-internal fun assertOrThrow(code: ErrorCode, body: () -> Unit) {
+internal fun assertOrThrow(
+    code: ErrorCode,
+    body: () -> Unit,
+) {
     try {
         body()
     } catch (e: AssertException) {

@@ -8,7 +8,6 @@ import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
-
 internal class PropertyPack : DataUnit {
     internal val unknownPropertyKeys = mutableListOf<String>()
 
@@ -46,13 +45,14 @@ internal class PropertyPack : DataUnit {
         get() = Int.SIZE_BYTES + validProperties.map { it.length }.sum()
 
     private val validProperties: List<SoftEtherProperty>
-        get() = this::class.memberProperties.filter {
-            it.name.startsWith("sep")
-        }.mapNotNull {
-            @Suppress("UNCHECKED_CAST")
-            it as KProperty1<PropertyPack, SoftEtherProperty?>
-            it.get(this)
-        }
+        get() =
+            this::class.memberProperties.filter {
+                it.name.startsWith("sep")
+            }.mapNotNull {
+                @Suppress("UNCHECKED_CAST")
+                it as KProperty1<PropertyPack, SoftEtherProperty?>
+                it.get(this)
+            }
 
     override fun write(buffer: ByteBuffer) {
         validProperties.also {
@@ -73,10 +73,11 @@ internal class PropertyPack : DataUnit {
             val keySize = buffer.int - 1
             assertAlways(keySize >= 0)
 
-            val key = ByteArray(keySize).let {
-                buffer.get(it)
-                it.toString(Charsets.US_ASCII)
-            }
+            val key =
+                ByteArray(keySize).let {
+                    buffer.get(it)
+                    it.toString(Charsets.US_ASCII)
+                }
 
             when (key) {
                 SEP_METHOD -> importProperty(SepMethod(), buffer)
@@ -117,7 +118,10 @@ internal class PropertyPack : DataUnit {
         }
     }
 
-    private fun importProperty(property: SoftEtherProperty, buffer: ByteBuffer) {
+    private fun importProperty(
+        property: SoftEtherProperty,
+        buffer: ByteBuffer,
+    ) {
         val targetPropertyName = "sep" + property::class.simpleName!!.substring(3)
         val kProperty = this::class.memberProperties.first { it.name == targetPropertyName }
 
@@ -132,14 +136,15 @@ internal class PropertyPack : DataUnit {
     }
 
     private fun discardProperty(buffer: ByteBuffer) {
-        val unknownProperty = when (buffer.int) {
-            SEP_INT_TYPE -> SoftEtherIntProperty()
-            SEP_BYTES_TYPE -> SoftEtherBytesProperty()
-            SEP_ASCII_TYPE -> SoftEtherAsciiProperty()
-            SEP_UTF8_TYPE -> SoftEtherUtf8Property()
-            SEP_LONG_TYPE -> SoftEtherLongProperty()
-            else -> throw NotImplementedError()
-        }
+        val unknownProperty =
+            when (buffer.int) {
+                SEP_INT_TYPE -> SoftEtherIntProperty()
+                SEP_BYTES_TYPE -> SoftEtherBytesProperty()
+                SEP_ASCII_TYPE -> SoftEtherAsciiProperty()
+                SEP_UTF8_TYPE -> SoftEtherUtf8Property()
+                SEP_LONG_TYPE -> SoftEtherLongProperty()
+                else -> throw NotImplementedError()
+            }
 
         buffer.move(-Int.SIZE_BYTES)
 

@@ -1,4 +1,4 @@
-package kittoku.mvc.service.teminal.ip
+package kittoku.mvc.service.terminal.ip
 
 import android.os.ParcelFileDescriptor
 import kittoku.mvc.extension.move
@@ -20,7 +20,6 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 
-
 internal class IPTerminal(private val bridge: ClientBridge) {
     private lateinit var fd: ParcelFileDescriptor
     private lateinit var inputStream: InputStream
@@ -34,10 +33,11 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     internal fun initializeBuilder() {
         val builder = bridge.service.Builder()
 
-        val prefixLength = bridge.subnetMask.let {
-            val buffer = ByteBuffer.wrap(it)
-            buffer.int.countOneBits()
-        }
+        val prefixLength =
+            bridge.subnetMask.let {
+                val buffer = ByteBuffer.wrap(it)
+                buffer.int.countOneBits()
+            }
 
         builder.addAddress(bridge.assignedIpAddress.toInetAddress(), prefixLength)
         builder.addRoute("0.0.0.0", 0)
@@ -55,23 +55,24 @@ internal class IPTerminal(private val bridge: ClientBridge) {
     }
 
     internal fun launchJobRetrieve() {
-        jobRetrieve = bridge.scope.launch(bridge.handler) {
-            val bufferSize = bridge.internalEthernetMTU + ETHERNET_HEADER_SIZE
-            val alpha = ByteBuffer.allocate(bufferSize)
-            val beta = ByteBuffer.allocate(bufferSize)
+        jobRetrieve =
+            bridge.scope.launch(bridge.handler) {
+                val bufferSize = bridge.internalEthernetMTU + ETHERNET_HEADER_SIZE
+                val alpha = ByteBuffer.allocate(bufferSize)
+                val beta = ByteBuffer.allocate(bufferSize)
 
-            var isAlphaGo = true
+                var isAlphaGo = true
 
-            while (isActive) {
-                if (isAlphaGo) {
-                    retrievePacket(alpha)
-                    isAlphaGo = false
-                } else {
-                    retrievePacket(beta)
-                    isAlphaGo = true
+                while (isActive) {
+                    if (isAlphaGo) {
+                        retrievePacket(alpha)
+                        isAlphaGo = false
+                    } else {
+                        retrievePacket(beta)
+                        isAlphaGo = true
+                    }
                 }
             }
-        }
     }
 
     private suspend fun retrievePacket(buffer: ByteBuffer) {

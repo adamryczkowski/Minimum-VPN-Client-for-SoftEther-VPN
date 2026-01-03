@@ -22,6 +22,7 @@
 ## Overview
 
 This template will provide a production-ready Flutter project scaffold with:
+
 - Native C++23 code integration via FFI (Foreign Function Interface)
 - Comprehensive linting, formatting, and static analysis for both Dart and C++
 - Testing infrastructure for unit, widget, golden, and integration tests
@@ -30,7 +31,9 @@ This template will provide a production-ready Flutter project scaffold with:
 - **Android-only** target platform, built and tested on Linux
 
 ### Target Use Case
+
 Building a SoftEther VPN client for Android that requires:
+
 - Flutter UI layer with Material Design 3
 - C++23 native code for VPN protocol implementation
 - Platform channels for Android VpnService integration
@@ -62,12 +65,14 @@ Building a SoftEther VPN client for Android that requires:
 **Riverpod** is a reactive state management library for Flutter. It is the successor to the popular Provider package, created by the same author (Remi Rousselet).
 
 **What it does:**
+
 - Provides a way to manage application state in a predictable, testable manner
 - Enables dependency injection without BuildContext
 - Supports compile-time safety (catches errors at compile time, not runtime)
 - Works well with async operations (API calls, database queries)
 
 **Why it's useful for VPN client:**
+
 - Managing VPN connection state (connected, disconnected, connecting)
 - Storing user preferences and server configurations
 - Handling async operations like authentication and server discovery
@@ -77,12 +82,14 @@ Building a SoftEther VPN client for Android that requires:
 **GoRouter** is a declarative routing package for Flutter that simplifies navigation.
 
 **What it does:**
+
 - Provides URL-based routing (useful for deep linking)
 - Supports nested navigation and shell routes
 - Handles redirects (e.g., redirect to login if not authenticated)
 - Works seamlessly with Riverpod for route guards
 
 **Why it's useful for VPN client:**
+
 - Navigate between screens (home, settings, server list, connection details)
 - Deep link support for connecting to specific servers via URL
 - Route guards to prevent access to certain screens when not connected
@@ -176,7 +183,7 @@ linter:
     - literal_only_boolean_expressions
     - throw_in_finally
     - unnecessary_statements
-    
+
     # Style rules
     - always_declare_return_types
     - always_put_required_named_parameters_first
@@ -261,6 +268,7 @@ dev_dependencies:
 ```
 
 DCM metrics include:
+
 - **CYCLO** - Cyclomatic Complexity
 - **MNL** - Max Nesting Level
 - **NOI** - Number of Imports
@@ -290,6 +298,7 @@ dev_dependencies:
 ```
 
 Features:
+
 - Run `dart format`
 - Run `dart analyze`
 - Check for invalid imports in test files
@@ -839,13 +848,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   test: ^1.25.0
-  
+
   # Mocking
   mocktail: ^1.0.0
-  
+
   # Golden testing
   alchemist: ^0.10.0
-  
+
   # Integration testing
   patrol: ^3.0.0
   integration_test:
@@ -896,6 +905,7 @@ just build-android-release
 ```
 
 If you later need CI/CD, consider:
+
 - **Self-hosted GitLab CI**: Use `.gitlab-ci.yml` with Flutter Docker images
 - **Jenkins**: Configure pipelines with Flutter SDK installed on agents
 - **Local automation**: Use `just` commands in cron jobs or git hooks

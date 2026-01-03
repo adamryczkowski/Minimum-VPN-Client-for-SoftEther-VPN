@@ -5,7 +5,6 @@ import kittoku.mvc.extension.read
 import kittoku.mvc.unit.ip.IPv4_ADDRESS_SIZE
 import java.nio.ByteBuffer
 
-
 internal open class SoftEtherIPAddressProperty : SoftEtherProperty() {
     override val valueType = SEP_INT_TYPE
     override val valueNum = 1

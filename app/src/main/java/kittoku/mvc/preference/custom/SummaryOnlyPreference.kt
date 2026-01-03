@@ -9,15 +9,15 @@ import androidx.preference.PreferenceViewHolder
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.getStringPrefValue
 
-
 internal abstract class SummaryOnlyPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
     abstract val mvcPreference: MvcPreference
     abstract val preferenceTitle: String
-    protected open val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == mvcPreference.name) {
-            updateSummary()
+    protected open val listener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == mvcPreference.name) {
+                updateSummary()
+            }
         }
-    }
 
     protected open val summaryValue: String
         get() = getStringPrefValue(mvcPreference, sharedPreferences!!)
@@ -69,12 +69,13 @@ internal class EthernetMacAddressPreference(context: Context, attrs: AttributeSe
 internal class AboutProjectPreference(context: Context, attrs: AttributeSet) : SummaryOnlyPreference(context, attrs) {
     override val mvcPreference = MvcPreference.ABOUT_PROJECT
     override val preferenceTitle = "About This App"
-    override val summaryValue = listOf(
-        "This is an unofficial open-source SoftEther-VPN-protocol-based VPN client." ,
-        "This app includes part of SoftEtherVPN source code which is under Apache License 2.0.",
-        """"SoftEther" is a registered trademark of SoftEther Corporation.""",
-        "If you need more information, please move to each project page from the following links.",
-    ).joinToString("\n\n")
+    override val summaryValue =
+        listOf(
+            "This is an unofficial open-source SoftEther-VPN-protocol-based VPN client.",
+            "This app includes part of SoftEtherVPN source code which is under Apache License 2.0.",
+            """"SoftEther" is a registered trademark of SoftEther Corporation.""",
+            "If you need more information, please move to each project page from the following links.",
+        ).joinToString("\n\n")
 
     override fun onAttached() {
         super.onAttached()

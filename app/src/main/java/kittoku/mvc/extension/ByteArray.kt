@@ -5,7 +5,6 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
-
 internal fun ByteArray.isSame(other: ByteArray): Boolean {
     if (this.size != other.size) return false
 
@@ -16,7 +15,10 @@ internal fun ByteArray.isSame(other: ByteArray): Boolean {
     return true
 }
 
-internal fun ByteArray.match(pattern: ByteArray, offset: Int=0): Boolean {
+internal fun ByteArray.match(
+    pattern: ByteArray,
+    offset: Int = 0,
+): Boolean {
     if (pattern.size > this.size - offset) return false
 
     for (i in pattern.indices) {
@@ -74,7 +76,8 @@ internal fun ByteArray.toBroadcastAddress(subnetMask: ByteArray): ByteArray {
 internal fun ByteArray.toStringOrNull(charset: Charset): String? {
     try {
         return toString(charset)
-    } catch (_: Exception) {}
+    } catch (_: Exception) {
+    }
 
     return null
 }

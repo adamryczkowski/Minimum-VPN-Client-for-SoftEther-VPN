@@ -9,7 +9,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import kittoku.mvc.preference.MvcPreference
 
-
 internal abstract class LinkPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
     abstract val mvcPreference: MvcPreference
     abstract val preferenceTitle: String

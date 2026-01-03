@@ -1,7 +1,7 @@
 # Implementation Plan: SoftEther Android Client
 
-**Based on:** Forking "Minimum-VPN-Client-for-SoftEther-VPN"  
-**Template Reference:** `~/tmp/my-softether-android`  
+**Based on:** Forking "Minimum-VPN-Client-for-SoftEther-VPN"
+**Template Reference:** `~/tmp/my-softether-android`
 **Date:** January 2, 2026
 
 ## Executive Summary
@@ -21,6 +21,7 @@ This plan outlines a milestone-based approach to building a production-ready Sof
 **Repository:** `ref/Minimum-VPN-Client-for-SoftEther-VPN`
 
 **Architecture:**
+
 - Pure Kotlin Android application (no native C++ code)
 - Uses Android VpnService for tunnel management
 - Implements SoftEther protocol directly in Kotlin
@@ -34,12 +35,14 @@ This plan outlines a milestone-based approach to building a production-ready Sof
   - [`ARPClient`](../ref/Minimum-VPN-Client-for-SoftEther-VPN/app/src/main/java/kittoku/mvc/service/client/arp/ARPClient.kt) - ARP resolution
 
 **Build Configuration:**
+
 - Kotlin 1.5.31 (outdated)
 - Android Gradle Plugin 7.0.3 (outdated)
 - compileSdkVersion 31, targetSdkVersion 31 (outdated)
 - minSdkVersion 26
 
 **Existing Tests:**
+
 - Single test file: [`MvcTest.kt`](../ref/Minimum-VPN-Client-for-SoftEther-VPN/app/src/test/java/kittoku/mvc/MvcTest.kt)
 - Tests include:
   - `testControlClient()` - Integration test requiring live server
@@ -51,6 +54,7 @@ This plan outlines a milestone-based approach to building a production-ready Sof
   - `testByteArraySearch()` - Unit test for byte array search
 
 **Limitations:**
+
 - No instrumented tests (androidTest)
 - No mocking framework
 - Integration tests require environment variables for server credentials
@@ -63,6 +67,7 @@ This plan outlines a milestone-based approach to building a production-ready Sof
 **Location:** `~/tmp/my-softether-android`
 
 **Features to adopt:**
+
 - Flutter + C++ FFI architecture (for future native code if needed)
 - Comprehensive justfile with 40+ commands
 - Pre-commit hooks (Dart, C++, YAML, shell, CMake)
@@ -109,6 +114,7 @@ This plan outlines a milestone-based approach to building a production-ready Sof
 - [ ] **0.8** Verify project builds successfully
 
 **Deliverables:**
+
 - Clean, buildable project with modern tooling
 - Justfile with basic commands
 - Pre-commit hooks installed
@@ -146,6 +152,7 @@ This plan outlines a milestone-based approach to building a production-ready Sof
 - [ ] **1.6** Create baseline test report
 
 **Deliverables:**
+
 - All existing tests passing
 - Manual test checklist completed
 - Known issues documented
@@ -162,12 +169,14 @@ This plan outlines a milestone-based approach to building a production-ready Sof
 #### 2.1 Unit Testing Framework
 
 - [ ] **2.1.1** Add testing dependencies to `build.gradle.kts`:
+
   ```kotlin
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
   testImplementation("io.mockk:mockk:1.13.9")
   testImplementation("com.google.truth:truth:1.4.0")
   testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
   ```
+
 - [ ] **2.1.2** Migrate from JUnit 4 to JUnit 5
 - [ ] **2.1.3** Create test utilities package:
   - `TestClientBridge` - Mock-friendly bridge for testing
@@ -178,12 +187,14 @@ This plan outlines a milestone-based approach to building a production-ready Sof
 #### 2.2 Instrumented Testing
 
 - [ ] **2.2.1** Add instrumented test dependencies:
+
   ```kotlin
   androidTestImplementation("androidx.test:runner:1.5.2")
   androidTestImplementation("androidx.test:rules:1.5.0")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
   androidTestImplementation("io.mockk:mockk-android:1.13.9")
   ```
+
 - [ ] **2.2.2** Create base test classes for instrumented tests
 - [ ] **2.2.3** Add UI tests for settings screens
 
@@ -246,6 +257,7 @@ test-env-check:
 ```
 
 **Deliverables:**
+
 - Modern testing framework with MockK
 - JUnit 5 migration complete
 - Instrumented test infrastructure
@@ -264,17 +276,21 @@ test-env-check:
 #### 3.1 Code Quality Tools
 
 - [ ] **3.1.1** Add ktlint for Kotlin formatting:
+
   ```kotlin
   plugins {
       id("org.jlleitschuh.gradle.ktlint") version "12.0.0"
   }
   ```
+
 - [ ] **3.1.2** Add detekt for static analysis:
+
   ```kotlin
   plugins {
       id("io.gitlab.arturbosch.detekt") version "1.23.0"
   }
   ```
+
 - [ ] **3.1.3** Configure detekt rules in `detekt.yml`
 - [ ] **3.1.4** Add `just lint` and `just format` commands
 - [ ] **3.1.5** Fix all linting issues
@@ -297,6 +313,7 @@ test-env-check:
 - [ ] **3.3.4** Create developer setup guide
 
 **Deliverables:**
+
 - ktlint and detekt configured
 - All linting issues resolved
 - Interfaces extracted for testability
@@ -310,6 +327,7 @@ test-env-check:
 **Goal:** Add new features using Test-Driven Development.
 
 All features in this milestone follow TDD:
+
 1. Write failing test
 2. Implement minimum code to pass
 3. Refactor
@@ -330,6 +348,7 @@ All features in this milestone follow TDD:
 
 - [ ] **4.2.1** Write tests for connection state machine
 - [ ] **4.2.2** Implement `ConnectionState` sealed class:
+
   ```kotlin
   sealed class ConnectionState {
       object Disconnected : ConnectionState()
@@ -338,6 +357,7 @@ All features in this milestone follow TDD:
       data class Error(val message: String) : ConnectionState()
   }
   ```
+
 - [ ] **4.2.3** Write tests for notification manager
 - [ ] **4.2.4** Implement persistent notification with connection stats
 - [ ] **4.2.5** Write tests for quick settings tile
@@ -375,6 +395,7 @@ All features in this milestone follow TDD:
 - [ ] **4.5.8** Implement split tunnel UI
 
 **Deliverables:**
+
 - Connection profiles with import/export
 - Rich connection status and notifications
 - Connection statistics with history
@@ -413,6 +434,7 @@ All features in this milestone follow TDD:
   - Screen reader support
 
 **Deliverables:**
+
 - Full Jetpack Compose UI
 - Material Design 3 theming
 - Dark mode and dynamic colors
@@ -458,6 +480,7 @@ All features in this milestone follow TDD:
 - [ ] **6.4.6** Add `just release` command
 
 **Deliverables:**
+
 - Security-hardened application
 - Optimized performance
 - Comprehensive error handling
@@ -504,6 +527,7 @@ class MockSoftEtherServer {
 ### Test Data
 
 Create test fixtures in `app/src/test/resources/`:
+
 - `valid-profile.json` - Valid VPN profile
 - `invalid-profile.json` - Invalid profile for error testing
 - `dhcp-response.bin` - Sample DHCP response
@@ -518,6 +542,7 @@ Create test fixtures in `app/src/test/resources/`:
 **Risk:** Changes may break compatibility with SoftEther servers.
 
 **Mitigation:**
+
 - Maintain integration tests against real server
 - Document protocol behavior
 - Keep original implementation as reference
@@ -528,6 +553,7 @@ Create test fixtures in `app/src/test/resources/`:
 **Risk:** Future Android versions may change VpnService behavior.
 
 **Mitigation:**
+
 - Test on multiple Android versions (26-35)
 - Follow Android VPN best practices
 - Monitor Android developer announcements
@@ -538,6 +564,7 @@ Create test fixtures in `app/src/test/resources/`:
 **Risk:** Integration tests require live server access.
 
 **Mitigation:**
+
 - Create mock server for CI/CD
 - Document manual testing procedures
 - Use recorded packet captures for replay tests
@@ -547,6 +574,7 @@ Create test fixtures in `app/src/test/resources/`:
 **Risk:** Major version upgrades may introduce breaking changes.
 
 **Mitigation:**
+
 - Upgrade incrementally
 - Run full test suite after each upgrade
 - Keep dependencies up to date
@@ -573,37 +601,44 @@ Create test fixtures in `app/src/test/resources/`:
 ## Success Criteria
 
 ### Milestone 0
+
 - [ ] Project builds without errors
 - [ ] Pre-commit hooks run successfully
 - [ ] Justfile commands work
 
 ### Milestone 1
+
 - [ ] All existing unit tests pass
 - [ ] Integration tests pass against family VPN server
 - [ ] Manual testing checklist completed
 
 ### Milestone 2
+
 - [ ] Test coverage > 60%
 - [ ] MockK-based unit tests
 - [ ] Mock server for integration tests
 - [ ] All justfile test commands work
 
 ### Milestone 3
+
 - [ ] Zero ktlint/detekt violations
 - [ ] Dependency injection configured
 - [ ] Architecture documentation complete
 
 ### Milestone 4
+
 - [ ] All new features have tests
 - [ ] Test coverage > 70%
 - [ ] Features work on Android 26-35
 
 ### Milestone 5
+
 - [ ] Full Compose UI
 - [ ] Material 3 theming
 - [ ] Accessibility audit passed
 
 ### Milestone 6
+
 - [ ] Security audit passed
 - [ ] Performance benchmarks met
 - [ ] Release build signed and tested

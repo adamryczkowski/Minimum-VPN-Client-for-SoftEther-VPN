@@ -22,7 +22,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
-
 internal class DhcpClient(private val bridge: ClientBridge) {
     internal fun launchJobInitial() {
         bridge.scope.launch(bridge.handler) {
@@ -79,28 +78,31 @@ internal class DhcpClient(private val bridge: ClientBridge) {
     }
 
     private suspend fun sendAsBroadcast(message: DhcpMessage) {
-        val datagram = UDPDatagram().also {
-            it.dstPort = UDP_PORT_DHCP_SEVER
-            it.srcPort = UDP_PORT_DHCP_CLIENT
-            it.payloadDhcpMessage = message
-        }
+        val datagram =
+            UDPDatagram().also {
+                it.dstPort = UDP_PORT_DHCP_SEVER
+                it.srcPort = UDP_PORT_DHCP_CLIENT
+                it.payloadDhcpMessage = message
+            }
 
-        val packet = IPv4Packet().also {
-            it.protocol = IP_PROTOCOL_UDP
-            it.identification = bridge.random.nextInt().toShort()
-            it.dstAddress.read(IPv4_BROADCAST_ADDRESS)
-            it.srcAddress.read(IPv4_UNKNOWN_ADDRESS)
-            it.payloadUDPDatagram = datagram
+        val packet =
+            IPv4Packet().also {
+                it.protocol = IP_PROTOCOL_UDP
+                it.identification = bridge.random.nextInt().toShort()
+                it.dstAddress.read(IPv4_BROADCAST_ADDRESS)
+                it.srcAddress.read(IPv4_UNKNOWN_ADDRESS)
+                it.payloadUDPDatagram = datagram
 
-            datagram.importIPv4Header(it)
-        }
+                datagram.importIPv4Header(it)
+            }
 
-        val frame = EthernetFrame().also {
-            it.etherType = ETHER_TYPE_IPv4
-            it.dstMac.read(ETHERNET_BROADCAST_ADDRESS)
-            it.srcMac.read(bridge.clientMacAddress)
-            it.payloadIPv4Packet = packet
-        }
+        val frame =
+            EthernetFrame().also {
+                it.etherType = ETHER_TYPE_IPv4
+                it.dstMac.read(ETHERNET_BROADCAST_ADDRESS)
+                it.srcMac.read(bridge.clientMacAddress)
+                it.payloadIPv4Packet = packet
+            }
 
         bridge.controlChannel.send(frame)
     }
@@ -113,7 +115,9 @@ internal class DhcpClient(private val bridge: ClientBridge) {
 
             return if (reply.options.messageType == DHCP_MESSAGE_TYPE_OFFER) {
                 reply
-            } else null
+            } else {
+                null
+            }
         }
     }
 
@@ -124,52 +128,64 @@ internal class DhcpClient(private val bridge: ClientBridge) {
 
             return if (reply.options.messageType == DHCP_MESSAGE_TYPE_ACK) {
                 reply
-            } else null
+            } else {
+                null
+            }
         }
     }
 
     private suspend fun startDiscoverOfferSequence(timeout: Long): DhcpMessage? {
-         return withTimeoutOrNull(timeout) {
-             val transactionId = bridge.random.nextInt()
+        return withTimeoutOrNull(timeout) {
+            val transactionId = bridge.random.nextInt()
 
-             val options = OptionPack().also {
-                 it.messageType = DHCP_MESSAGE_TYPE_DISCOVER
-                 it.optionParameterList = DhcpOptionParameterList().also { option ->
-                     option.value = prepareBasicOptionsParameters()
-                 }
-             }
+            val options =
+                OptionPack().also {
+                    it.messageType = DHCP_MESSAGE_TYPE_DISCOVER
+                    it.optionParameterList =
+                        DhcpOptionParameterList().also { option ->
+                            option.value = prepareBasicOptionsParameters()
+                        }
+                }
 
-             val message = DhcpMessage().also {
-                 it.opcode = DHCP_OPCODE_BOOT_REQUEST
-                 it.transactionId = transactionId
-                 it.clientMacAddress.read(bridge.clientMacAddress)
-                 it.options = options
-             }
+            val message =
+                DhcpMessage().also {
+                    it.opcode = DHCP_OPCODE_BOOT_REQUEST
+                    it.transactionId = transactionId
+                    it.clientMacAddress.read(bridge.clientMacAddress)
+                    it.options = options
+                }
 
-             sendAsBroadcast(message)
-             expectOfferMessage(transactionId)
+            sendAsBroadcast(message)
+            expectOfferMessage(transactionId)
         }
     }
 
-    private suspend fun startRequestAckSequence(offer: DhcpMessage, timeout: Long): DhcpMessage? {
+    private suspend fun startRequestAckSequence(
+        offer: DhcpMessage,
+        timeout: Long,
+    ): DhcpMessage? {
         return withTimeoutOrNull(timeout) {
-            val options = OptionPack().also {
-                it.messageType = DHCP_MESSAGE_TYPE_REQUEST
-                it.optionRequestedAddress = DhcpOptionRequestedAddress().also { option ->
-                    option.address.read(offer.yourIpAddress)
+            val options =
+                OptionPack().also {
+                    it.messageType = DHCP_MESSAGE_TYPE_REQUEST
+                    it.optionRequestedAddress =
+                        DhcpOptionRequestedAddress().also { option ->
+                            option.address.read(offer.yourIpAddress)
+                        }
+                    it.optionDhcpServerAddress = offer.options.optionDhcpServerAddress
+                    it.optionParameterList =
+                        DhcpOptionParameterList().also { option ->
+                            option.value = prepareBasicOptionsParameters()
+                        }
                 }
-                it.optionDhcpServerAddress = offer.options.optionDhcpServerAddress
-                it.optionParameterList = DhcpOptionParameterList().also { option ->
-                    option.value = prepareBasicOptionsParameters()
-                }
-            }
 
-            val message = DhcpMessage().also {
-                it.opcode = DHCP_OPCODE_BOOT_REQUEST
-                it.transactionId = offer.transactionId
-                it.clientMacAddress.read(bridge.clientMacAddress)
-                it.options = options
-            }
+            val message =
+                DhcpMessage().also {
+                    it.opcode = DHCP_OPCODE_BOOT_REQUEST
+                    it.transactionId = offer.transactionId
+                    it.clientMacAddress.read(bridge.clientMacAddress)
+                    it.options = options
+                }
 
             sendAsBroadcast(message)
             expectAckMessage(offer.transactionId)

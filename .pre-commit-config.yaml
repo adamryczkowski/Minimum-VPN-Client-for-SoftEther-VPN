@@ -1,8 +1,7 @@
+---
 # Pre-commit configuration for SoftEther Connect
 # See https://pre-commit.com for more information
-
 fail_fast: false
-
 repos:
   # Core hygiene hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -16,6 +15,7 @@ repos:
       - id: check-symlinks
       - id: check-yaml
       - id: check-json
+      - id: check-xml
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
@@ -35,11 +35,25 @@ repos:
       - id: typos
         args: [--write-changes]
 
+  # Markdown linting
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.20.0
+    hooks:
+      - id: markdownlint-cli2
+        args: [--fix]
+
   # YAML formatting
   - repo: https://github.com/lyz-code/yamlfix
     rev: 1.17.0
     hooks:
       - id: yamlfix
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        exclude: ^gradlew$
 
   # Shell script formatting
   - repo: https://github.com/adamryczkowski/beautysh
@@ -47,15 +61,16 @@ repos:
     hooks:
       - id: beautysh
         args: [--indent-size=4, --tab, --force-function-style=fnpar]
+        exclude: ^gradlew$
 
   # Justfile formatting
   - repo: local
     hooks:
       - id: format-justfiles
         name: Format justfiles
-        entry: bash -c 'just --justfile "$1" --dump > "$1.formatted" && mv "$1.formatted" "$1"' --
+        entry: scripts/format-justfile.sh
         files: justfile$
-        language: system
+        language: script
         pass_filenames: true
 
   # Kotlin formatting with ktlint (via Gradle)
@@ -67,7 +82,6 @@ repos:
         language: system
         files: \.kt$
         pass_filenames: false
-
       - id: ktlint-check
         name: ktlint check
         entry: ./gradlew ktlintCheck
@@ -75,3 +89,13 @@ repos:
         files: \.kt$
         pass_filenames: false
         stages: [pre-push]
+
+  # XML formatting (optional - requires xmllint)
+  - repo: local
+    hooks:
+      - id: format-xml
+        name: Format XML files
+        entry: scripts/format-xml.sh
+        files: \.xml$
+        language: script
+        pass_filenames: true

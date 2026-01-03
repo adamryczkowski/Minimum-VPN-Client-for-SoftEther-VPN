@@ -1,12 +1,10 @@
 package kittoku.mvc.unit.property
 
-
 internal const val SEP_INT_TYPE = 0
 internal const val SEP_BYTES_TYPE = 1
 internal const val SEP_ASCII_TYPE = 2
 internal const val SEP_UTF8_TYPE = 3
 internal const val SEP_LONG_TYPE = 4
-
 
 internal const val SEP_METHOD = "method"
 internal const val SEP_AUTH_TYPE = "authtype"

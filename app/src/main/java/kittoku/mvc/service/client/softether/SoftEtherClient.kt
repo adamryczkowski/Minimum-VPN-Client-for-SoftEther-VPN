@@ -8,15 +8,14 @@ import kittoku.mvc.extension.read
 import kittoku.mvc.hash.hashSha0
 import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlMessage
-import kittoku.mvc.service.teminal.udp.CHACHA20_POLY1305_KEY_SIZE
-import kittoku.mvc.service.teminal.udp.UDP_CIPHER_ALGORITHM
+import kittoku.mvc.service.terminal.udp.CHACHA20_POLY1305_KEY_SIZE
+import kittoku.mvc.service.terminal.udp.UDP_CIPHER_ALGORITHM
 import kittoku.mvc.unit.http.HttpMessage
 import kittoku.mvc.unit.property.*
 import kotlinx.coroutines.launch
 import java.net.Inet4Address
 import java.nio.ByteBuffer
 import javax.crypto.spec.SecretKeySpec
-
 
 internal class SoftEtherClient(private val bridge: ClientBridge) {
     private lateinit var challenge: SepRandom
@@ -31,17 +30,18 @@ internal class SoftEtherClient(private val bridge: ClientBridge) {
     }
 
     private suspend fun checkSoftEtherServer() { // reserved for future use
-        val request = HttpMessage().also {
-            it.header = "GET / HTTP/1.1"
-            it.fieldMap["X-VPN"] = "1"
-            it.fieldMap["Host"] = bridge.serverHostname
-            it.fieldMap["Keep-Alive"] = HTTP_KEEP_ALIVE
-            it.fieldMap["Connection"] = "Keep-Alive"
-            it.fieldMap["Accept-Language"] = "ja"
-            it.fieldMap["User-Agent"] = DEFAULT_USER_AGENT
-            it.fieldMap["Pragma"] = "no-cache"
-            it.fieldMap["Cache-Control"] = "no-cache"
-        }
+        val request =
+            HttpMessage().also {
+                it.header = "GET / HTTP/1.1"
+                it.fieldMap["X-VPN"] = "1"
+                it.fieldMap["Host"] = bridge.serverHostname
+                it.fieldMap["Keep-Alive"] = HTTP_KEEP_ALIVE
+                it.fieldMap["Connection"] = "Keep-Alive"
+                it.fieldMap["Accept-Language"] = "ja"
+                it.fieldMap["User-Agent"] = DEFAULT_USER_AGENT
+                it.fieldMap["Pragma"] = "no-cache"
+                it.fieldMap["Cache-Control"] = "no-cache"
+            }
 
         bridge.controlChannel.send(request)
         val response = bridge.softEtherChannel.receive()
@@ -57,30 +57,32 @@ internal class SoftEtherClient(private val bridge: ClientBridge) {
         val randomSize = bridge.random.nextInt(2000)
         val bodySize = WATERMARK.size + randomSize
 
-        val request = HttpMessage().also {
-            it.header = "POST /vpnsvc/connect.cgi HTTP/1.1"
-            it.fieldMap["Host"] = bridge.serverHostname
-            it.fieldMap["Content-Type"] = "image/jpeg"
-            it.fieldMap["Content-Length"] = bodySize.toString()
-            it.fieldMap["Connection"] = "Keep-Alive"
-        }
+        val request =
+            HttpMessage().also {
+                it.header = "POST /vpnsvc/connect.cgi HTTP/1.1"
+                it.fieldMap["Host"] = bridge.serverHostname
+                it.fieldMap["Content-Type"] = "image/jpeg"
+                it.fieldMap["Content-Length"] = bodySize.toString()
+                it.fieldMap["Connection"] = "Keep-Alive"
+            }
 
-
-        request.body = ByteBuffer.allocate(bodySize).let {
-            it.put(WATERMARK)
-            it.put(bridge.random.nextBytes(randomSize))
-            it.array()
-        }
+        request.body =
+            ByteBuffer.allocate(bodySize).let {
+                it.put(WATERMARK)
+                it.put(bridge.random.nextBytes(randomSize))
+                it.array()
+            }
 
         bridge.controlChannel.send(request)
         val response = bridge.softEtherChannel.receive()
 
-        val pack = PropertyPack().also {
-            val buffer = ByteBuffer.wrap(response.body!!)
-            assertOrThrow(ErrorCode.SOFTETHER_INVALID_PROPERTY_PACK) {
-                it.read(buffer)
+        val pack =
+            PropertyPack().also {
+                val buffer = ByteBuffer.wrap(response.body!!)
+                assertOrThrow(ErrorCode.SOFTETHER_INVALID_PROPERTY_PACK) {
+                    it.read(buffer)
+                }
             }
-        }
 
         assertOrThrow(ErrorCode.SOFTETHER_INVALID_PROTOCOL_SERVER) {
             assertAlways(response.header == HTTP_200_HEADER)
@@ -113,10 +115,11 @@ internal class SoftEtherClient(private val bridge: ClientBridge) {
         properties.sepHalfConnection = SepHalfConnection().also { it.value = 0 }
         properties.sepSecurePassword = SepSecurePassword().also { it.value.read(calcSecurePassword()) }
         properties.sepClientProductName = SepClientProductName().also { it.value = "Minimum VPN Client for SoftEther VPN" }
-        properties.sepPenCore = SepPenCore().also {
-            val randomSize = bridge.random.nextInt(1000)
-            it.value = bridge.random.nextBytes(randomSize)
-        }
+        properties.sepPenCore =
+            SepPenCore().also {
+                val randomSize = bridge.random.nextInt(1000)
+                it.value = bridge.random.nextBytes(randomSize)
+            }
 
         bridge.udpAccelerationConfig?.also { config ->
             properties.sepUseUDPAcceleration = SepUseUDPAcceleration().also { it.value = true }
@@ -125,14 +128,15 @@ internal class SoftEtherClient(private val bridge: ClientBridge) {
             properties.sepUDPClientIP = SepUDPClientIP().also { it.value.read(config.clientReportedAddress.address) }
             properties.sepUDPClientPort = SepUDPClientPort().also { it.value = config.clientReportedPort }
             properties.sepUDPSupportFastDisconnectDetect = SepUDPSupportFastDisconnectDetect().also { it.value = true }
-            properties.sepUDPClientKeyV2 = SepUDPClientKeyV2().also {
-                val key = bridge.random.nextBytes(UDP_ACCELERATION_V2_KEY_SIZE)
-                it.value = key
+            properties.sepUDPClientKeyV2 =
+                SepUDPClientKeyV2().also {
+                    val key = bridge.random.nextBytes(UDP_ACCELERATION_V2_KEY_SIZE)
+                    it.value = key
 
-                val array = ByteArray(CHACHA20_POLY1305_KEY_SIZE)
-                array.read(key)
-                config.clientKey = SecretKeySpec(array, UDP_CIPHER_ALGORITHM)
-            }
+                    val array = ByteArray(CHACHA20_POLY1305_KEY_SIZE)
+                    array.read(key)
+                    config.clientKey = SecretKeySpec(array, UDP_CIPHER_ALGORITHM)
+                }
         }
 
         val buffer = ByteBuffer.allocate(properties.length)
@@ -142,25 +146,27 @@ internal class SoftEtherClient(private val bridge: ClientBridge) {
     }
 
     private suspend fun uploadProperties() {
-        val request = HttpMessage().also {
-            it.header = "POST /vpnsvc/vpn.cgi HTTP/1.1"
-            it.body = prepareProperties()
-            it.fieldMap["Host"] = bridge.serverHostname
-            it.fieldMap["Content-Type"] = "application/octet-stream"
-            it.fieldMap["Content-Length"] = it.body!!.size.toString()
-            it.fieldMap["Connection"] = "Keep-Alive"
-            it.fieldMap["Keep-Alive"] = HTTP_KEEP_ALIVE
-        }
+        val request =
+            HttpMessage().also {
+                it.header = "POST /vpnsvc/vpn.cgi HTTP/1.1"
+                it.body = prepareProperties()
+                it.fieldMap["Host"] = bridge.serverHostname
+                it.fieldMap["Content-Type"] = "application/octet-stream"
+                it.fieldMap["Content-Length"] = it.body!!.size.toString()
+                it.fieldMap["Connection"] = "Keep-Alive"
+                it.fieldMap["Keep-Alive"] = HTTP_KEEP_ALIVE
+            }
 
         bridge.controlChannel.send(request)
         val response = bridge.softEtherChannel.receive()
 
-        val pack = PropertyPack().also {
-            val buffer = ByteBuffer.wrap(response.body!!)
-            assertOrThrow(ErrorCode.SOFTETHER_INVALID_PROPERTY_PACK) {
-                it.read(buffer)
+        val pack =
+            PropertyPack().also {
+                val buffer = ByteBuffer.wrap(response.body!!)
+                assertOrThrow(ErrorCode.SOFTETHER_INVALID_PROPERTY_PACK) {
+                    it.read(buffer)
+                }
             }
-        }
 
         assertOrThrow(ErrorCode.SOFTETHER_AUTHENTICATION_FAILED) {
             assertAlways(response.header == HTTP_200_HEADER)
@@ -195,7 +201,6 @@ internal class SoftEtherClient(private val bridge: ClientBridge) {
                     array.read(it)
                     config.serverKey = SecretKeySpec(array, UDP_CIPHER_ALGORITHM)
                 } ?: throw AssertionError()
-
             }
         }
     }

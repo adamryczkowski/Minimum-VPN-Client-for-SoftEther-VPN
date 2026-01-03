@@ -1,6 +1,5 @@
 package kittoku.mvc.extension
 
-
 internal fun Int.addOnesComplement(addend: Int): Int {
     var sum = this + addend
 

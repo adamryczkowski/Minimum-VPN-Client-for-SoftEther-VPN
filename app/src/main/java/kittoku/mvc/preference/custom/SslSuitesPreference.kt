@@ -9,19 +9,19 @@ import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.getSetPrefValue
 import javax.net.ssl.SSLContext
 
-
 internal class SslSuitesPreference(context: Context, attrs: AttributeSet) : MultiSelectListPreference(context, attrs) {
     private val mvcPreference = MvcPreference.SSL_SUITES
     private val preferenceTitle = "Select Cipher Suites"
-    private val provider = SummaryProvider<Preference> {
-        val currentValue = getSetPrefValue(mvcPreference, it.sharedPreferences!!)
+    private val provider =
+        SummaryProvider<Preference> {
+            val currentValue = getSetPrefValue(mvcPreference, it.sharedPreferences!!)
 
-        when (currentValue.size) {
-            0 -> "[No Suite Entered]"
-            1 -> "1 Suite Selected"
-            else -> "${currentValue.size} Suites Selected"
+            when (currentValue.size) {
+                0 -> "[No Suite Entered]"
+                1 -> "1 Suite Selected"
+                else -> "${currentValue.size} Suites Selected"
+            }
         }
-    }
 
     override fun onAttached() {
         super.onAttached()

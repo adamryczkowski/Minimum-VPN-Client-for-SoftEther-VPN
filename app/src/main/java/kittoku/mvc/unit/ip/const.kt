@@ -1,6 +1,5 @@
 package kittoku.mvc.unit.ip
 
-
 internal const val IPv4_HEADER_SIZE = 20
 internal const val IPv4_VERSION_AND_HEADER_LENGTH: Byte = 0x45
 internal const val IPv4_DEFAULT_TTL: Byte = Byte.MAX_VALUE

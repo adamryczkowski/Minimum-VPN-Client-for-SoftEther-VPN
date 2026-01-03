@@ -3,7 +3,6 @@ package kittoku.mvc.unit.property
 import kittoku.mvc.debug.assertAlways
 import java.nio.ByteBuffer
 
-
 internal open class SoftEtherAsciiProperty : SoftEtherProperty() {
     override val valueType = SEP_ASCII_TYPE
     override val valueNum = 1

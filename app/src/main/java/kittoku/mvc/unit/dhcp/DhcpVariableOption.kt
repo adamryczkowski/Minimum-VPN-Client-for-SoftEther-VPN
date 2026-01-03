@@ -3,7 +3,6 @@ package kittoku.mvc.unit.dhcp
 import kittoku.mvc.extension.toIntAsUByte
 import java.nio.ByteBuffer
 
-
 internal abstract class DhcpVariableOption : DhcpOption() {
     internal var value: ByteArray? = null
 
@@ -21,9 +20,14 @@ internal abstract class DhcpVariableOption : DhcpOption() {
     override fun read(buffer: ByteBuffer) {
         val valueLength = buffer.get().toIntAsUByte()
 
-        value = if (valueLength > 0) ByteArray(valueLength).also {
-            buffer.get(it)
-        } else null
+        value =
+            if (valueLength > 0) {
+                ByteArray(valueLength).also {
+                    buffer.get(it)
+                }
+            } else {
+                null
+            }
     }
 }
 

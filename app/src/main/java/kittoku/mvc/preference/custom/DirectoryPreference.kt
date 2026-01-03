@@ -8,15 +8,15 @@ import androidx.preference.Preference
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.getStringPrefValue
 
-
 internal abstract class DirectoryPreference(context: Context, attrs: AttributeSet) : Preference(context, attrs) {
     abstract val mvcPreference: MvcPreference
     abstract val preferenceTitle: String
-    protected open val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == mvcPreference.name) {
-            updateSummary()
+    protected open val listener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == mvcPreference.name) {
+                updateSummary()
+            }
         }
-    }
 
     private val summaryValue: String
         get() {

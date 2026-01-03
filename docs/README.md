@@ -7,9 +7,11 @@
 ## Quick Summary
 
 ### Recommended Approach
+
 **Kotlin with Jetpack Compose + Native SoftEther Protocol**
 
 ### Key Findings
+
 1. ✅ **VpnService API is compatible** with SoftEther (no root required)
 2. ✅ **Working reference implementation exists** - `Minimum-VPN-Client-for-SoftEther-VPN`
 3. ✅ **Native protocol can work on Android** via Layer 2 over Layer 3 adaptation
@@ -40,11 +42,13 @@ Located in `ref/` directory:
 ## Architecture Decision
 
 ### Why Native SoftEther Protocol?
+
 - Matches your laptop's SoftEther VPN Client experience
 - Best performance with UDP acceleration support
 - Full compatibility with existing server configuration
 
 ### Why Kotlin/Jetpack Compose?
+
 - Direct VpnService API access (no bridging)
 - Best performance for VPN apps
 - Google's recommended Android development stack

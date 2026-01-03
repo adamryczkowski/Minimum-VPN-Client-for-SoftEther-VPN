@@ -5,7 +5,6 @@ import kittoku.mvc.unit.DataUnit
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
 
-
 private const val CR: Byte = 0x0D
 private const val LF: Byte = 0x0A
 
@@ -48,7 +47,6 @@ internal class HttpMessage : DataUnit {
 
             buffer.position(it + 2)
         }
-
 
         while (true) {
             val stop = buffer.nextCrlf()

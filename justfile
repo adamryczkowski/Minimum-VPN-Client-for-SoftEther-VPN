@@ -121,6 +121,31 @@ lint:
 format:
     ./gradlew ktlintFormat
 
+# Run all formatting hooks (ktlint + pre-commit formatters)
+format-all: format
+    @echo "==> Running formatting hooks"
+    @echo "Running end-of-file-fixer..."
+    @pre-commit run end-of-file-fixer --all-files || true
+    @echo "Running trailing-whitespace..."
+    @pre-commit run trailing-whitespace --all-files || true
+    @echo "Running mixed-line-ending..."
+    @pre-commit run mixed-line-ending --all-files || true
+    @echo "Running fix-byte-order-marker..."
+    @pre-commit run fix-byte-order-marker --all-files || true
+    @echo "Running yamlfix..."
+    @pre-commit run yamlfix --all-files || true
+    @echo "Running beautysh..."
+    @pre-commit run beautysh --all-files || true
+    @echo "Running format-xml..."
+    @pre-commit run format-xml --all-files || true
+    @echo "Running markdownlint-cli2..."
+    @pre-commit run markdownlint-cli2 --all-files || true
+    @echo "Running format-justfiles..."
+    @pre-commit run format-justfiles --all-files || true
+    @echo "Running typos..."
+    @pre-commit run typos --all-files || true
+    @echo "==> Formatting complete"
+
 # Run all pre-commit hooks
 validate:
     pre-commit run --all-files

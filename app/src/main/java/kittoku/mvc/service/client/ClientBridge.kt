@@ -9,10 +9,10 @@ import kittoku.mvc.extension.toHexByteArray
 import kittoku.mvc.extension.toHexString
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.*
-import kittoku.mvc.service.teminal.udp.CHACHA20_POLY1305_NONCE_SIZE
-import kittoku.mvc.service.teminal.udp.CHACHA20_POLY1305_TAG_SIZE
-import kittoku.mvc.service.teminal.udp.UDPStatus
-import kittoku.mvc.service.teminal.udp.UDP_SOFTETHER_HEADER_SIZE
+import kittoku.mvc.service.terminal.udp.CHACHA20_POLY1305_NONCE_SIZE
+import kittoku.mvc.service.terminal.udp.CHACHA20_POLY1305_TAG_SIZE
+import kittoku.mvc.service.terminal.udp.UDPStatus
+import kittoku.mvc.service.terminal.udp.UDP_SOFTETHER_HEADER_SIZE
 import kittoku.mvc.unit.DataUnit
 import kittoku.mvc.unit.ethernet.ETHERNET_HEADER_SIZE
 import kittoku.mvc.unit.ethernet.ETHERNET_MAC_ADDRESS_SIZE
@@ -28,7 +28,6 @@ import kotlinx.coroutines.channels.Channel
 import java.net.Inet4Address
 import java.security.SecureRandom
 import javax.crypto.SecretKey
-
 
 internal enum class ControlMessage {
     SOFTETHER_NEGOTIATION_FINISHED,
@@ -60,38 +59,40 @@ internal class UDPAccelerationConfig(random: SecureRandom) {
     internal lateinit var nattAddress: Inet4Address
 
     internal val validServerPorts: List<Int>
-        get() = mutableListOf<Int>().also {
-            if (serverCurrentPort != 0) {
-                it.add(serverCurrentPort)
-            }
+        get() =
+            mutableListOf<Int>().also {
+                if (serverCurrentPort != 0) {
+                    it.add(serverCurrentPort)
+                }
 
-            if (serverReportedPort != 0 && serverReportedPort != serverCurrentPort) {
-                it.add(serverReportedPort)
-            }
+                if (serverReportedPort != 0 && serverReportedPort != serverCurrentPort) {
+                    it.add(serverReportedPort)
+                }
 
-            if (serverNATTPort != 0 && serverNATTPort != serverCurrentPort && serverNATTPort != serverReportedPort) {
-                it.add(serverNATTPort)
+                if (serverNATTPort != 0 && serverNATTPort != serverCurrentPort && serverNATTPort != serverReportedPort) {
+                    it.add(serverNATTPort)
+                }
             }
-        }
 
     internal val validServerAddresses: List<Inet4Address>
-        get() = mutableListOf<Inet4Address>().also { list ->
-            serverCurrentAddress?.also {
-                list.add(it)
-            }
-
-            serverReportedAddress.also {
-                if (it != serverCurrentAddress) {
+        get() =
+            mutableListOf<Inet4Address>().also { list ->
+                serverCurrentAddress?.also {
                     list.add(it)
                 }
-            }
 
-            serverNATTAddress?.also {
-                if (it != serverCurrentAddress && it != serverReportedAddress) {
-                    list.add(it)
+                serverReportedAddress.also {
+                    if (it != serverCurrentAddress) {
+                        list.add(it)
+                    }
+                }
+
+                serverNATTAddress?.also {
+                    if (it != serverCurrentAddress && it != serverReportedAddress) {
+                        list.add(it)
+                    }
                 }
             }
-        }
 
     init {
         val hex = random.nextBytes(1).toHexString().lowercase()
@@ -129,7 +130,7 @@ internal class ClientBridge(internal val scope: CoroutineScope, internal val han
     internal val subnetMask = ByteArray(IPv4_ADDRESS_SIZE)
     internal val defaultGatewayIpAddress = ByteArray(IPv4_ADDRESS_SIZE)
     internal val defaultGatewayMacAddress = ByteArray(ETHERNET_MAC_ADDRESS_SIZE)
-    internal val dhcpServerIpAddress  = ByteArray(IPv4_ADDRESS_SIZE)
+    internal val dhcpServerIpAddress = ByteArray(IPv4_ADDRESS_SIZE)
 
     internal var dnsServerIpAddress: ByteArray? = null
     internal var leaseTime: Long? = null
@@ -179,7 +180,10 @@ internal class ClientBridge(internal val scope: CoroutineScope, internal val han
         logDirectory = loadUri(MvcPreference.LOG_DIRECTORY, prefs)
     }
 
-    private fun loadUri(key: MvcPreference, prefs: SharedPreferences): Uri? {
+    private fun loadUri(
+        key: MvcPreference,
+        prefs: SharedPreferences,
+    ): Uri? {
         val uriString = getStringPrefValue(key, prefs)
 
         return if (uriString.isEmpty()) {

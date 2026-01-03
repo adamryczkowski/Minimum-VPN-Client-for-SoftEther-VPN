@@ -8,7 +8,6 @@ import kittoku.mvc.unit.DataUnit
 import kittoku.mvc.unit.udp.UDPDatagram
 import java.nio.ByteBuffer
 
-
 internal class IPv4Packet : DataUnit { // not to be fragmented
     internal var identification: Short = 0
     internal var protocol: Byte = 0
@@ -90,7 +89,10 @@ internal class IPv4Packet : DataUnit { // not to be fragmented
         }
     }
 
-    private fun calcChecksum(start: Int, buffer: ByteBuffer): Short {
+    private fun calcChecksum(
+        start: Int,
+        buffer: ByteBuffer,
+    ): Short {
         var sum = 0
 
         (start until (start + IPv4_HEADER_SIZE) step 2).forEach {
@@ -105,18 +107,4 @@ internal class IPv4Packet : DataUnit { // not to be fragmented
             invSum.toShort()
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

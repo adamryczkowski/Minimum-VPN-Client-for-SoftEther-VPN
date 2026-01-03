@@ -1,6 +1,5 @@
 package kittoku.mvc.unit.ethernet
 
-
 internal const val ETHER_TYPE_IPv4: Short = 0x0800
 internal const val ETHER_TYPE_ARP: Short = 0x0806
 
