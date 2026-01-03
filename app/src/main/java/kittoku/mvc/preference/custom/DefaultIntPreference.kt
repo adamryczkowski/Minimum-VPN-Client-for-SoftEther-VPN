@@ -14,7 +14,7 @@ internal abstract class DefaultIntPreference(context: Context, attrs: AttributeS
     abstract val mvcPreference: MvcPreference
     abstract val preferenceTitle: String
     private val provider = SummaryProvider<Preference> {
-        getIntPrefValue(mvcPreference, it.sharedPreferences).toString()
+        getIntPrefValue(mvcPreference, it.sharedPreferences!!).toString()
     }
 
     override fun onAttached() {

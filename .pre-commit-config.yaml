@@ -1,0 +1,77 @@
+# Pre-commit configuration for SoftEther Connect
+# See https://pre-commit.com for more information
+
+fail_fast: false
+
+repos:
+  # Core hygiene hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-yaml
+      - id: check-json
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+
+  # Secret scanning
+  - repo: https://github.com/sirwart/ripsecrets
+    rev: v0.1.11
+    hooks:
+      - id: ripsecrets
+
+  # Typo checking
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.28.4
+    hooks:
+      - id: typos
+        args: [--write-changes]
+
+  # YAML formatting
+  - repo: https://github.com/lyz-code/yamlfix
+    rev: 1.17.0
+    hooks:
+      - id: yamlfix
+
+  # Shell script formatting
+  - repo: https://github.com/adamryczkowski/beautysh
+    rev: v6.2.3
+    hooks:
+      - id: beautysh
+        args: [--indent-size=4, --tab, --force-function-style=fnpar]
+
+  # Justfile formatting
+  - repo: local
+    hooks:
+      - id: format-justfiles
+        name: Format justfiles
+        entry: bash -c 'just --justfile "$1" --dump > "$1.formatted" && mv "$1.formatted" "$1"' --
+        files: justfile$
+        language: system
+        pass_filenames: true
+
+  # Kotlin formatting with ktlint (via Gradle)
+  - repo: local
+    hooks:
+      - id: ktlint-format
+        name: ktlint format
+        entry: ./gradlew ktlintFormat
+        language: system
+        files: \.kt$
+        pass_filenames: false
+
+      - id: ktlint-check
+        name: ktlint check
+        entry: ./gradlew ktlintCheck
+        language: system
+        files: \.kt$
+        pass_filenames: false
+        stages: [pre-push]

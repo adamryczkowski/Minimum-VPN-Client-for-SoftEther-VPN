@@ -1,0 +1,36 @@
+# mise-en-place configuration for SoftEther Connect
+# This file configures project-local tool versions managed by mise.
+# See: https://mise.jdx.dev/
+#
+# To install all tools: mise install
+# To activate in shell: eval "$(mise activate bash)" or add to ~/.bashrc
+
+[env]
+# Android SDK environment - managed by mise
+# ANDROID_HOME is set automatically by the android-sdk plugin
+# After mise install, run 'just mise-android-sdk' to install SDK components
+
+# Java environment - managed by mise
+# JAVA_HOME is set automatically by mise
+
+[tools]
+# Java - required for Android development
+# Android SDK requires Java 17+, we use Java 21 for LTS
+java = "temurin-21"
+
+# Android SDK command-line tools - provides sdkmanager
+# Version 13.0 is the latest stable command-line tools version
+# After installation, use 'just mise-android-sdk' to install SDK components:
+#   - platforms;android-36
+#   - build-tools;35.0.0
+android-sdk = "13.0"
+
+# yq - required dependency for android-sdk plugin
+# Used to parse Android SDK metadata during installation
+yq = "latest"
+
+# Pre-commit for git hooks
+pre-commit = "latest"
+
+# Just - command runner (justfile)
+just = "latest"

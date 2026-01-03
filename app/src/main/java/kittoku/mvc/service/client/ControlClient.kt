@@ -99,7 +99,7 @@ internal class ControlClient(private val bridge: ClientBridge) {
                 while (isActive) {
                     relayDhcpMessage()
 
-                    if (mailbox.poll() == ControlMessage.DHCP_NEGOTIATION_FINISHED) {
+                    if (mailbox.tryReceive().getOrNull() == ControlMessage.DHCP_NEGOTIATION_FINISHED) {
                         bridge.dhcpChannel.clear()
                         break
                     }
@@ -114,7 +114,7 @@ internal class ControlClient(private val bridge: ClientBridge) {
                 while (isActive) {
                     relayAprPacket()
 
-                    if (mailbox.poll() == ControlMessage.ARP_NEGOTIATION_FINISHED) {
+                    if (mailbox.tryReceive().getOrNull() == ControlMessage.ARP_NEGOTIATION_FINISHED) {
                         bridge.arpChannel.clear()
                         break
                     }

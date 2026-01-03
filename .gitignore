@@ -8,3 +8,17 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Environment files
+.env
+.env.local
+
+# Pre-commit cache
+.pre-commit-cache/
+
+# Mise local files
+.mise.local.toml
+
+# Generated files
+*.apk
+*.aab

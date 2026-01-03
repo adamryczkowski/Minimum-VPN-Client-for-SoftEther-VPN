@@ -16,7 +16,7 @@ internal abstract class NonEmptyStringPreference(context: Context, attrs: Attrib
     open val emptyNotice = "[No Value Entered]"
     open val textType = InputType.TYPE_CLASS_TEXT
     open val provider = SummaryProvider<Preference> {
-        val currentValue = getStringPrefValue(mvcPreference, it.sharedPreferences)
+        val currentValue = getStringPrefValue(mvcPreference, it.sharedPreferences!!)
 
         if (currentValue.isEmpty()) {
             emptyNotice
@@ -53,7 +53,7 @@ internal class HomePasswordPreference(context: Context, attrs: AttributeSet) : N
     override val textType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
 
     override val provider = SummaryProvider<Preference> {
-        val currentValue = getStringPrefValue(mvcPreference, it.sharedPreferences)
+        val currentValue = getStringPrefValue(mvcPreference, it.sharedPreferences!!)
 
         if (currentValue.isEmpty()) {
             emptyNotice
@@ -71,7 +71,7 @@ internal class HomeHubPreference(context: Context, attrs: AttributeSet) : NonEmp
     override fun onAttached() {
         super.onAttached()
 
-        if (!sharedPreferences.contains(mvcPreference.name)) {
+        if (sharedPreferences?.contains(mvcPreference.name) != true) {
             text = "VPN"
         }
     }
