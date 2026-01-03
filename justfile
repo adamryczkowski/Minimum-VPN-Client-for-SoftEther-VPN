@@ -81,7 +81,7 @@ clean:
 
 # === Test ===
 
-# Run all unit tests
+# Run all unit tests (excludes integration tests)
 test:
     ./gradlew test
 
@@ -89,12 +89,43 @@ test:
 test-verbose:
     ./gradlew test --info
 
+# Run unit tests for debug build only
+test-debug:
+    ./gradlew testDebugUnitTest
+
+# Run unit tests with code coverage report
+test-coverage:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "🧪 Running tests with coverage..."
+    ./gradlew testDebugUnitTest jacocoTestReport
+    echo ""
+    echo "📊 Coverage report generated:"
+    echo "   HTML: app/build/reports/jacoco/jacocoTestReport/html/index.html"
+    echo "   XML:  app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+
+# Verify coverage meets threshold (60%)
+test-coverage-verify:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "🔍 Verifying coverage threshold..."
+    ./gradlew jacocoTestCoverageVerification
+    echo "✅ Coverage meets minimum threshold"
+
+# Run integration tests (requires TEST_HOST, TEST_USERNAME, TEST_PASSWORD)
+test-integration: test-env-check
+    ./gradlew :app:testDebugUnitTest --tests "*IntegrationTest*"
+
 # Run instrumented tests on connected device
 test-instrumented:
     ./gradlew connectedAndroidTest
 
-# Run all tests
+# Run all tests (unit + instrumented, excludes integration)
 test-all: test test-instrumented
+
+# Run complete test suite including integration tests
+test-full: test-env-check test test-integration test-instrumented
+    @echo "✅ Full test suite completed"
 
 # Check test environment variables
 test-env-check:
@@ -110,6 +141,30 @@ test-env-check:
         exit 1
     fi
     echo "✅ Test environment configured"
+
+# Show test report in browser
+test-report:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    report="app/build/reports/tests/testDebugUnitTest/index.html"
+    if [ -f "$report" ]; then
+        xdg-open "$report" 2>/dev/null || open "$report" 2>/dev/null || echo "Open: $report"
+    else
+        echo "❌ Test report not found. Run 'just test' first."
+        exit 1
+    fi
+
+# Show coverage report in browser
+coverage-report:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    report="app/build/reports/jacoco/jacocoTestReport/html/index.html"
+    if [ -f "$report" ]; then
+        xdg-open "$report" 2>/dev/null || open "$report" 2>/dev/null || echo "Open: $report"
+    else
+        echo "❌ Coverage report not found. Run 'just test-coverage' first."
+        exit 1
+    fi
 
 # === Code Quality ===
 

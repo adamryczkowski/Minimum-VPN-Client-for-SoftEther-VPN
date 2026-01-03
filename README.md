@@ -1,5 +1,9 @@
 # Minimum VPN Client for SoftEther VPN
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](.)
+[![Coverage](https://img.shields.io/badge/coverage-60%25-yellow)](app/build/reports/jacoco/jacocoTestReport/html/index.html)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 This is an open-source SoftEther-VPN-protocol-based VPN client for Android
 
 ## Notice
@@ -37,3 +41,54 @@ You can download the latest version APK
 ## Screenshots
 
 <img src="images/example_home.png" width=25%> <img src="images/example_setting.png" width=25%>
+
+## Development
+
+### Prerequisites
+
+* Java 17 (managed via mise)
+* Android SDK (API 36)
+* [just](https://just.systems/) command runner
+* [pre-commit](https://pre-commit.com/) for code quality hooks
+
+### Quick Start
+
+```bash
+# Install development tools and hooks
+just setup-full
+
+# Build debug APK
+just build
+
+# Run tests
+just test
+
+# Run tests with coverage
+just test-coverage
+
+# Format code
+just format
+```
+
+### Testing
+
+| Command | Description |
+|---------|-------------|
+| `just test` | Run unit tests |
+| `just test-coverage` | Run tests with JaCoCo coverage report |
+| `just test-instrumented` | Run instrumented tests on device |
+| `just test-integration` | Run integration tests (requires VPN server) |
+| `just test-all` | Run unit + instrumented tests |
+
+### Code Quality
+
+```bash
+# Run all pre-commit hooks
+just validate
+
+# Format Kotlin code
+just format
+
+# Check linting
+just lint
+```
