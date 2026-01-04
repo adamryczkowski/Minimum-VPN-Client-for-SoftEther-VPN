@@ -1,9 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Configuration for SoftEther Connect VPN Client
+
+    This configuration provides:
+    1. Cleartext traffic disabled by default (HTTPS only)
+    2. Debug-only overrides for development
+    3. Certificate pinning support (commented template for production)
+    4. System and user CA trust for VPN connections
+
+    For production deployment with certificate pinning:
+    - Uncomment the domain-config section
+    - Replace example.com with your VPN server domain
+    - Add SHA-256 pins for your server certificates
+    - Always include a backup pin
+
+    To generate a pin from a certificate:
+    openssl x509 -in cert.pem -pubkey -noout | \
+        openssl pkey -pubin -outform der | \
+        openssl dgst -sha256 -binary | \
+        openssl enc -base64
+-->
 <network-security-config>
-    <base-config>
+    <!-- Base configuration for all connections -->
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
+            <!-- Trust system CAs for general HTTPS connections -->
             <certificates src="system" />
-            <certificates src="user" />
         </trust-anchors>
     </base-config>
+
+    <!-- Debug overrides - only active when android:debuggable="true" -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- Allow user-installed CAs for debugging -->
+            <certificates src="user" />
+            <!-- Allow system CAs -->
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+
+    <!--
+        VPN Server Certificate Pinning Template
+
+        Uncomment and configure for production use.
+        Replace with your actual VPN server domain and certificate pins.
+
+        IMPORTANT:
+        - Always include at least 2 pins (primary + backup)
+        - Set expiration date to allow for certificate rotation
+        - Test thoroughly before deploying
+
+    <domain-config>
+        <domain includeSubdomains="true">vpn.example.com</domain>
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    -->
+
+    <!--
+        User-configured VPN servers
+
+        Since VPN servers are user-configured, we trust both system and user CAs
+        to allow connections to servers with custom certificates.
+        This is necessary for enterprise VPN deployments.
+    -->
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- Match all domains for VPN connections -->
+        <domain includeSubdomains="true">*</domain>
+        <trust-anchors>
+            <!-- Trust system CAs -->
+            <certificates src="system" />
+            <!-- Trust user-installed CAs for enterprise deployments -->
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
 </network-security-config>

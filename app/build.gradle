@@ -25,11 +25,14 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             testCoverageEnabled true
+            // Disable minification for faster debug builds
+            minifyEnabled false
         }
     }
 
@@ -79,6 +82,7 @@ def versions = [
     activityCompose: '1.10.1',
     navigationCompose: '2.9.0',
     koinCompose: '4.0.0',
+    encryptedPrefs: '1.1.1', // ed-george/encrypted-shared-preferences fork
 ]
 
 dependencies {
@@ -106,6 +110,10 @@ dependencies {
 
     // Kotlinx Serialization (JSON)
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.serialization}"
+
+    // Encrypted SharedPreferences (ed-george fork - post-deprecation support)
+    // For secure credential storage
+    implementation "dev.spght:encryptedprefs-ktx:${versions.encryptedPrefs}"
 
     // Koin - Dependency Injection
     implementation "io.insert-koin:koin-android:${versions.koin}"
