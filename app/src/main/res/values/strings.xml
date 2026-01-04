@@ -47,4 +47,19 @@
     <string name="error_invalid_port">Port must be between 1 and 65535</string>
     <string name="error_import_failed">Failed to import profiles</string>
     <string name="error_export_failed">Failed to export profiles</string>
+
+    <!-- Split Tunnel -->
+    <string name="split_tunnel_title">Split Tunneling</string>
+    <string name="split_tunnel_enable">Enable Split Tunneling</string>
+    <string name="split_tunnel_mode">Tunneling Mode</string>
+    <string name="split_tunnel_mode_exclude">Exclude selected apps (bypass VPN)</string>
+    <string name="split_tunnel_mode_include">Include only selected apps (use VPN)</string>
+    <string name="split_tunnel_search_hint">Search apps</string>
+    <string name="split_tunnel_show_system_apps">Show system apps</string>
+    <string name="split_tunnel_select_all">Select All</string>
+    <string name="split_tunnel_deselect_all">Deselect All</string>
+    <string name="split_tunnel_app_list">Installed Apps</string>
+    <string name="split_tunnel_no_apps">No apps found</string>
+    <string name="app_icon_description">App icon</string>
+    <string name="system_app_badge">System</string>
 </resources>

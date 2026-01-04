@@ -18,11 +18,18 @@ import kittoku.mvc.repository.VpnConnectionRepository
 import kittoku.mvc.service.ProfileImportExportService
 import kittoku.mvc.service.ProfileImportExportServiceImpl
 import kittoku.mvc.service.VpnConnectionManager
+import kittoku.mvc.splittunnel.InstalledAppsProvider
+import kittoku.mvc.splittunnel.InstalledAppsProviderImpl
+import kittoku.mvc.splittunnel.PackageManagerWrapper
+import kittoku.mvc.splittunnel.PackageManagerWrapperImpl
+import kittoku.mvc.splittunnel.SplitTunnelSettings
+import kittoku.mvc.splittunnel.SplitTunnelSettingsImpl
 import kittoku.mvc.statistics.ConnectionTimer
 import kittoku.mvc.statistics.StatisticsRepository
 import kittoku.mvc.statistics.TrafficCounter
 import kittoku.mvc.viewmodel.HomeViewModel
 import kittoku.mvc.viewmodel.ProfileViewModel
+import kittoku.mvc.viewmodel.SplitTunnelViewModel
 import kittoku.mvc.viewmodel.StatisticsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -108,6 +115,26 @@ val appModule =
         // Trusted network checker (singleton)
         single { TrustedNetworkChecker(get(), get(), get()) }
 
+        // === Split Tunnel Layer ===
+        // SharedPreferences for split tunnel settings
+        single(qualifier = org.koin.core.qualifier.named("split_tunnel_prefs")) {
+            androidContext().getSharedPreferences(
+                "split_tunnel_prefs",
+                Context.MODE_PRIVATE,
+            )
+        }
+
+        // Package manager wrapper (singleton)
+        single<PackageManagerWrapper> { PackageManagerWrapperImpl(androidContext()) }
+
+        // Installed apps provider (singleton)
+        single<InstalledAppsProvider> { InstalledAppsProviderImpl(get()) }
+
+        // Split tunnel settings (singleton)
+        single<SplitTunnelSettings> {
+            SplitTunnelSettingsImpl(get(qualifier = org.koin.core.qualifier.named("split_tunnel_prefs")))
+        }
+
         // === ViewModel Layer ===
         // Home screen ViewModel
         viewModel { HomeViewModel(get(), get()) }
@@ -117,6 +144,9 @@ val appModule =
 
         // Statistics ViewModel
         viewModel { StatisticsViewModel(get(), get(), get()) }
+
+        // Split tunnel ViewModel
+        viewModel { SplitTunnelViewModel(get(), get()) }
     }
 
 /**

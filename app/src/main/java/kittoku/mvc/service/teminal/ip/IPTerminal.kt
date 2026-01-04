@@ -1,9 +1,12 @@
 package kittoku.mvc.service.terminal.ip
 
+import android.content.pm.PackageManager
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import kittoku.mvc.extension.move
 import kittoku.mvc.extension.toInetAddress
 import kittoku.mvc.service.client.ClientBridge
+import kittoku.mvc.splittunnel.SplitTunnelApplicator
 import kittoku.mvc.unit.ethernet.ETHERNET_HEADER_SIZE
 import kittoku.mvc.unit.ethernet.ETHER_TYPE_IPv4
 import kittoku.mvc.unit.ip.IPv4_VERSION_AND_HEADER_LENGTH
@@ -20,7 +23,14 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 
-internal class IPTerminal(private val bridge: ClientBridge) {
+internal class IPTerminal(
+    private val bridge: ClientBridge,
+    private val splitTunnelApplicator: SplitTunnelApplicator? = null,
+) {
+    companion object {
+        private const val TAG = "IPTerminal"
+    }
+
     private lateinit var fd: ParcelFileDescriptor
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
@@ -49,9 +59,61 @@ internal class IPTerminal(private val bridge: ClientBridge) {
         builder.setBlocking(true)
         builder.setMtu(bridge.internalEthernetMTU)
 
+        // Apply split tunneling configuration
+        applySplitTunnel(builder)
+
         fd = builder.establish()!!
         inputStream = FileInputStream(fd.fileDescriptor)
         outputStream = FileOutputStream(fd.fileDescriptor)
+    }
+
+    /**
+     * Applies split tunnel configuration to the VPN builder.
+     * In INCLUDE mode, only selected apps use the VPN.
+     * In EXCLUDE mode, selected apps bypass the VPN.
+     */
+    private fun applySplitTunnel(builder: android.net.VpnService.Builder) {
+        val applicator = splitTunnelApplicator ?: return
+
+        if (!applicator.isSplitTunnelActive()) {
+            Log.d(TAG, "Split tunneling is not active")
+            return
+        }
+
+        // Apply allowed apps (INCLUDE mode)
+        val appsToAllow = applicator.getAppsToAllow()
+        if (appsToAllow.isNotEmpty()) {
+            Log.d(TAG, "Applying INCLUDE mode with ${appsToAllow.size} apps")
+            for (packageName in appsToAllow) {
+                try {
+                    builder.addAllowedApplication(packageName)
+                    Log.d(TAG, "Added allowed app: $packageName")
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.w(TAG, "App not found, skipping: $packageName")
+                }
+            }
+            // In INCLUDE mode, also add our own app to ensure VPN service works
+            try {
+                builder.addAllowedApplication(bridge.service.packageName)
+                Log.d(TAG, "Added own app to allowed list: ${bridge.service.packageName}")
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(TAG, "Failed to add own app to allowed list")
+            }
+        }
+
+        // Apply disallowed apps (EXCLUDE mode)
+        val appsToDisallow = applicator.getAppsToDisallow()
+        if (appsToDisallow.isNotEmpty()) {
+            Log.d(TAG, "Applying EXCLUDE mode with ${appsToDisallow.size} apps")
+            for (packageName in appsToDisallow) {
+                try {
+                    builder.addDisallowedApplication(packageName)
+                    Log.d(TAG, "Added disallowed app: $packageName")
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.w(TAG, "App not found, skipping: $packageName")
+                }
+            }
+        }
     }
 
     internal fun launchJobRetrieve() {

@@ -12,6 +12,11 @@ import androidx.preference.PreferenceManager
 import kittoku.mvc.R
 import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlClient
+import kittoku.mvc.splittunnel.InstalledAppsProviderImpl
+import kittoku.mvc.splittunnel.PackageManagerWrapperImpl
+import kittoku.mvc.splittunnel.SplitTunnelApplicator
+import kittoku.mvc.splittunnel.SplitTunnelApplicatorImpl
+import kittoku.mvc.splittunnel.SplitTunnelSettingsImpl
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,8 +32,9 @@ internal class SoftEtherVpnService : VpnService() {
     ): Int {
         return if (ACTION_VPN_CONNECT == intent?.action ?: false) {
             client?.kill(null)
+            val splitTunnelApplicator = createSplitTunnelApplicator()
             client =
-                ControlClient(createBridge()).also {
+                ControlClient(createBridge(), splitTunnelApplicator).also {
                     beForegrounded()
                     it.run()
                 }
@@ -40,6 +46,14 @@ internal class SoftEtherVpnService : VpnService() {
 
             Service.START_NOT_STICKY
         }
+    }
+
+    private fun createSplitTunnelApplicator(): SplitTunnelApplicator {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val settings = SplitTunnelSettingsImpl(prefs)
+        val packageManagerWrapper = PackageManagerWrapperImpl(this)
+        val installedAppsProvider = InstalledAppsProviderImpl(packageManagerWrapper)
+        return SplitTunnelApplicatorImpl(settings, installedAppsProvider)
     }
 
     private fun createBridge(): ClientBridge {

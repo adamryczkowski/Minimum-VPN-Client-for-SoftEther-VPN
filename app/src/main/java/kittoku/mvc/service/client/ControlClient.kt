@@ -20,13 +20,17 @@ import kittoku.mvc.service.terminal.ip.IPTerminal
 import kittoku.mvc.service.terminal.tcp.TCPTerminal
 import kittoku.mvc.service.terminal.udp.UDPStatus
 import kittoku.mvc.service.terminal.udp.UDPTerminal
+import kittoku.mvc.splittunnel.SplitTunnelApplicator
 import kittoku.mvc.unit.ethernet.*
 import kittoku.mvc.unit.http.HttpMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-internal class ControlClient(private val bridge: ClientBridge) {
+internal class ControlClient(
+    private val bridge: ClientBridge,
+    private val splitTunnelApplicator: SplitTunnelApplicator? = null,
+) {
     private lateinit var tcpTerminal: TCPTerminal
     private lateinit var ipTerminal: IPTerminal
     private var udpTerminal: UDPTerminal? = null
@@ -69,7 +73,7 @@ internal class ControlClient(private val bridge: ClientBridge) {
                     udpTerminal = UDPTerminal(bridge)
                 }
 
-                ipTerminal = IPTerminal(bridge)
+                ipTerminal = IPTerminal(bridge, splitTunnelApplicator)
 
                 // SoftEther negotiation
                 softEtherClient = SoftEtherClient(bridge).also { it.launchJobNegotiation() }
