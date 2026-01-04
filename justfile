@@ -307,3 +307,116 @@ emulator-full: emulator-setup emulator-start emulator-wait
 # Run instrumented tests on emulator (starts emulator if needed)
 test-on-emulator: emulator-start emulator-wait test-instrumented emulator-stop
     @echo "✅ Instrumented tests completed"
+
+# === Version Management ===
+
+# Show current version
+version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ -f version.properties ]]; then
+        major=$(grep "^VERSION_MAJOR=" version.properties | cut -d'=' -f2)
+        minor=$(grep "^VERSION_MINOR=" version.properties | cut -d'=' -f2)
+        patch=$(grep "^VERSION_PATCH=" version.properties | cut -d'=' -f2)
+        code=$(grep "^VERSION_CODE=" version.properties | cut -d'=' -f2)
+        echo "Version: ${major}.${minor}.${patch} (code: ${code})"
+    else
+        echo "version.properties not found"
+        exit 1
+    fi
+
+# Bump patch version (1.0.0 -> 1.0.1)
+version-bump-patch:
+    bash scripts/version-bump.sh patch
+
+# Bump minor version (1.0.0 -> 1.1.0)
+version-bump-minor:
+    bash scripts/version-bump.sh minor
+
+# Bump major version (1.0.0 -> 2.0.0)
+version-bump-major:
+    bash scripts/version-bump.sh major
+
+# === Release ===
+
+# Build release APK and AAB (requires keystore.properties)
+release: release-check
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "🚀 Building release artifacts..."
+    ./gradlew clean assembleRelease bundleRelease
+    echo ""
+    echo "✅ Release build complete!"
+    echo ""
+    echo "📦 Artifacts:"
+    find app/build/outputs -name "*.apk" -o -name "*.aab" | head -10
+    echo ""
+    echo "📝 Next steps:"
+    echo "   1. Test the release APK on a device"
+    echo "   2. Update docs/RELEASE_NOTES_TEMPLATE.md"
+    echo "   3. Upload to Google Play Console"
+
+# Check release prerequisites
+release-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "🔍 Checking release prerequisites..."
+    errors=0
+
+    # Check keystore.properties
+    if [[ ! -f keystore.properties ]]; then
+        echo "❌ keystore.properties not found"
+        echo "   Copy keystore.properties.example and fill in values"
+        errors=$((errors + 1))
+    else
+        echo "✅ keystore.properties found"
+    fi
+
+    # Check version.properties
+    if [[ ! -f version.properties ]]; then
+        echo "❌ version.properties not found"
+        errors=$((errors + 1))
+    else
+        echo "✅ version.properties found"
+    fi
+
+    # Check proguard rules
+    if [[ ! -f app/proguard-rules.pro ]]; then
+        echo "⚠️  proguard-rules.pro not found (using defaults)"
+    else
+        echo "✅ proguard-rules.pro found"
+    fi
+
+    if [[ $errors -gt 0 ]]; then
+        echo ""
+        echo "❌ Release check failed with $errors error(s)"
+        exit 1
+    fi
+
+    echo ""
+    echo "✅ All release prerequisites met"
+
+# Build release APK only
+release-apk: release-check
+    ./gradlew assembleRelease
+    @echo "APK: app/build/outputs/apk/release/app-release.apk"
+
+# Build release AAB (Android App Bundle) only
+release-bundle: release-check
+    ./gradlew bundleRelease
+    @echo "AAB: app/build/outputs/bundle/release/app-release.aab"
+
+# Generate SHA-256 checksums for release artifacts
+release-checksums:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "📝 Generating checksums..."
+    for file in app/build/outputs/apk/release/*.apk app/build/outputs/bundle/release/*.aab; do
+        if [[ -f "$file" ]]; then
+            sha256sum "$file"
+        fi
+    done
+
+# Full release workflow: test, build, checksums
+release-full: test lint release release-checksums
+    @echo "✅ Full release workflow complete"
