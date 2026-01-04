@@ -1,5 +1,14 @@
 package kittoku.mvc.di
 
+import android.content.Context
+import android.net.ConnectivityManager
+import kittoku.mvc.autoconnect.AutoConnectSettings
+import kittoku.mvc.autoconnect.NetworkMonitor
+import kittoku.mvc.autoconnect.TrustedNetworkChecker
+import kittoku.mvc.autoconnect.VpnConnectionStarter
+import kittoku.mvc.autoconnect.VpnConnectionStarterImpl
+import kittoku.mvc.autoconnect.WifiSsidProvider
+import kittoku.mvc.autoconnect.WifiSsidProviderImpl
 import kittoku.mvc.connection.ConnectionStateManager
 import kittoku.mvc.database.AppDatabase
 import kittoku.mvc.notification.VpnNotificationManager
@@ -69,6 +78,35 @@ val appModule =
 
         // Connection timer (singleton for current session)
         single { ConnectionTimer() }
+
+        // === Auto-Connect Layer ===
+        // SharedPreferences for auto-connect settings
+        single {
+            androidContext().getSharedPreferences(
+                "auto_connect_prefs",
+                Context.MODE_PRIVATE,
+            )
+        }
+
+        // Auto-connect settings (singleton)
+        single { AutoConnectSettings(get()) }
+
+        // VPN connection starter (singleton)
+        single<VpnConnectionStarter> { VpnConnectionStarterImpl() }
+
+        // ConnectivityManager
+        single {
+            androidContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        }
+
+        // Network monitor (singleton)
+        single { NetworkMonitor(get()) }
+
+        // WiFi SSID provider (singleton)
+        single<WifiSsidProvider> { WifiSsidProviderImpl(androidContext()) }
+
+        // Trusted network checker (singleton)
+        single { TrustedNetworkChecker(get(), get(), get()) }
 
         // === ViewModel Layer ===
         // Home screen ViewModel
