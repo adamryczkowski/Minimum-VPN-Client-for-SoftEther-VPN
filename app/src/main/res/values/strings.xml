@@ -2,4 +2,49 @@
 <resources>
     <string name="app_name">Minimum VPN Client for SoftEther VPN</string>
     <string name="app_name_short">Minimum VPN Client</string>
+
+    <!-- Profile Management -->
+    <string name="profiles">Profiles</string>
+    <string name="vpn_profile">VPN Profile</string>
+    <string name="add_profile">Add Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="delete_profile">Delete Profile</string>
+    <string name="profile_options">Profile options</string>
+    <string name="no_profiles">No VPN Profiles</string>
+    <string name="no_profiles_description">Add a VPN profile to get started</string>
+
+    <!-- Profile Form -->
+    <string name="profile_name">Profile Name</string>
+    <string name="server_address">Server Address</string>
+    <string name="port">Port</string>
+    <string name="hub_name">Hub Name</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Profile Actions -->
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="export_profile">Export</string>
+    <string name="import_profile">Import</string>
+
+    <!-- Delete Confirmation -->
+    <string name="delete_profile_title">Delete Profile?</string>
+    <string name="delete_profile_message">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
+
+    <!-- Messages -->
+    <string name="profile_created">Profile created successfully</string>
+    <string name="profile_updated">Profile updated successfully</string>
+    <string name="profile_deleted">Profile deleted</string>
+    <string name="import_success">Imported %1$d profile(s) successfully</string>
+    <string name="export_success">Profiles exported successfully</string>
+
+    <!-- Errors -->
+    <string name="error_name_required">Profile name is required</string>
+    <string name="error_server_required">Server address is required</string>
+    <string name="error_username_required">Username is required</string>
+    <string name="error_invalid_port">Port must be between 1 and 65535</string>
+    <string name="error_import_failed">Failed to import profiles</string>
+    <string name="error_export_failed">Failed to export profiles</string>
 </resources>

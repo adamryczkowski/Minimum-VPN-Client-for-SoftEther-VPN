@@ -1,8 +1,14 @@
 package kittoku.mvc.di
 
+import kittoku.mvc.database.AppDatabase
+import kittoku.mvc.repository.ProfileRepository
+import kittoku.mvc.repository.ProfileRepositoryImpl
 import kittoku.mvc.repository.VpnConnectionRepository
+import kittoku.mvc.service.ProfileImportExportService
+import kittoku.mvc.service.ProfileImportExportServiceImpl
 import kittoku.mvc.service.VpnConnectionManager
 import kittoku.mvc.viewmodel.HomeViewModel
+import kittoku.mvc.viewmodel.ProfileViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -12,23 +18,40 @@ import org.koin.dsl.module
  *
  * This module defines all the dependencies that can be injected throughout the app.
  * Dependencies are organized by layer:
+ * - Database layer: Room database
  * - Service layer: VPN service components
  * - Repository layer: Data access
  * - ViewModel layer: UI state management
  */
 val appModule =
     module {
+        // === Database Layer ===
+        // Room database (singleton)
+        single { AppDatabase.getInstance(androidContext()) }
+
+        // VPN Profile DAO
+        single { get<AppDatabase>().vpnProfileDao() }
+
         // === Repository Layer ===
         // VPN connection state repository (singleton)
         single { VpnConnectionRepository(androidContext()) }
+
+        // Profile repository (singleton)
+        single<ProfileRepository> { ProfileRepositoryImpl(get()) }
 
         // === Service Layer ===
         // VPN connection manager (singleton)
         single { VpnConnectionManager(androidContext(), get()) }
 
+        // Profile import/export service (singleton)
+        single<ProfileImportExportService> { ProfileImportExportServiceImpl(get()) }
+
         // === ViewModel Layer ===
         // Home screen ViewModel
         viewModel { HomeViewModel(get(), get()) }
+
+        // Profile management ViewModel
+        viewModel { ProfileViewModel(get(), get()) }
     }
 
 /**
