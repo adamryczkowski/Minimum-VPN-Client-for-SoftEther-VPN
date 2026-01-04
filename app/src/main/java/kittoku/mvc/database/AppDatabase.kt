@@ -8,23 +8,31 @@ import androidx.room.TypeConverters
 import kittoku.mvc.model.StringListConverter
 import kittoku.mvc.model.VpnProfile
 import kittoku.mvc.model.VpnProfileDao
+import kittoku.mvc.statistics.ConnectionSession
+import kittoku.mvc.statistics.ConnectionSessionDao
+import kittoku.mvc.statistics.DisconnectReasonConverter
 
 /**
  * Room database for the SoftEther Connect application.
  *
- * Contains the VPN profiles table and provides access to the DAO.
+ * Contains the VPN profiles and connection sessions tables.
  */
 @Database(
-    entities = [VpnProfile::class],
-    version = 1,
+    entities = [VpnProfile::class, ConnectionSession::class],
+    version = 2,
     exportSchema = false,
 )
-@TypeConverters(StringListConverter::class)
+@TypeConverters(StringListConverter::class, DisconnectReasonConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     /**
      * Get the VPN profile DAO for database operations.
      */
     abstract fun vpnProfileDao(): VpnProfileDao
+
+    /**
+     * Get the connection session DAO for statistics operations.
+     */
+    abstract fun connectionSessionDao(): ConnectionSessionDao
 
     companion object {
         private const val DATABASE_NAME = "softether_connect.db"

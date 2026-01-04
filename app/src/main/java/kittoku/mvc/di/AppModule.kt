@@ -9,8 +9,12 @@ import kittoku.mvc.repository.VpnConnectionRepository
 import kittoku.mvc.service.ProfileImportExportService
 import kittoku.mvc.service.ProfileImportExportServiceImpl
 import kittoku.mvc.service.VpnConnectionManager
+import kittoku.mvc.statistics.ConnectionTimer
+import kittoku.mvc.statistics.StatisticsRepository
+import kittoku.mvc.statistics.TrafficCounter
 import kittoku.mvc.viewmodel.HomeViewModel
 import kittoku.mvc.viewmodel.ProfileViewModel
+import kittoku.mvc.viewmodel.StatisticsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -34,12 +38,18 @@ val appModule =
         // VPN Profile DAO
         single { get<AppDatabase>().vpnProfileDao() }
 
+        // Connection Session DAO
+        single { get<AppDatabase>().connectionSessionDao() }
+
         // === Repository Layer ===
         // VPN connection state repository (singleton)
         single { VpnConnectionRepository(androidContext()) }
 
         // Profile repository (singleton)
         single<ProfileRepository> { ProfileRepositoryImpl(get()) }
+
+        // Statistics repository (singleton)
+        single { StatisticsRepository(get()) }
 
         // === Service Layer ===
         // Connection state manager (singleton)
@@ -54,12 +64,21 @@ val appModule =
         // Profile import/export service (singleton)
         single<ProfileImportExportService> { ProfileImportExportServiceImpl(get()) }
 
+        // Traffic counter (singleton for current session)
+        single { TrafficCounter() }
+
+        // Connection timer (singleton for current session)
+        single { ConnectionTimer() }
+
         // === ViewModel Layer ===
         // Home screen ViewModel
         viewModel { HomeViewModel(get(), get()) }
 
         // Profile management ViewModel
         viewModel { ProfileViewModel(get(), get()) }
+
+        // Statistics ViewModel
+        viewModel { StatisticsViewModel(get(), get(), get()) }
     }
 
 /**
