@@ -1,6 +1,8 @@
 package kittoku.mvc.di
 
+import kittoku.mvc.connection.ConnectionStateManager
 import kittoku.mvc.database.AppDatabase
+import kittoku.mvc.notification.VpnNotificationManager
 import kittoku.mvc.repository.ProfileRepository
 import kittoku.mvc.repository.ProfileRepositoryImpl
 import kittoku.mvc.repository.VpnConnectionRepository
@@ -40,6 +42,12 @@ val appModule =
         single<ProfileRepository> { ProfileRepositoryImpl(get()) }
 
         // === Service Layer ===
+        // Connection state manager (singleton)
+        single { ConnectionStateManager() }
+
+        // VPN notification manager (singleton)
+        single { VpnNotificationManager(androidContext()) }
+
         // VPN connection manager (singleton)
         single { VpnConnectionManager(androidContext(), get()) }
 
