@@ -61,7 +61,9 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
 
         socket.startHandshake()
         socket.soTimeout = TCP_CONTROL_UNIT_WAIT_TIMEOUT
-        bridge.service.protect(socket)
+        if (!bridge.isTest) {
+            bridge.service.protect(socket)
+        }
     }
 
     internal fun setTimeoutForData() {

@@ -62,4 +62,56 @@
     <string name="split_tunnel_no_apps">No apps found</string>
     <string name="app_icon_description">App icon</string>
     <string name="system_app_badge">System</string>
+
+    <!-- Settings Screen -->
+    <string name="settings">Settings</string>
+    <string name="connection_settings">Connection Settings</string>
+    <string name="server_hostname">Server Hostname</string>
+    <string name="server_hostname_description">VPN server address</string>
+    <string name="port_number">Port Number</string>
+    <string name="port_number_description">Server port (default: 443)</string>
+    <string name="hub_name_description">Virtual hub to connect to</string>
+    <string name="username_description">Your VPN username</string>
+    <string name="password_description">Your VPN password</string>
+    <string name="advanced_settings">Advanced Settings</string>
+    <string name="udp_acceleration">UDP Acceleration</string>
+    <string name="udp_acceleration_description">Enable faster data transfer using UDP</string>
+    <string name="ssl_settings">SSL/TLS Settings</string>
+    <string name="ssl_settings_description">Configure SSL cipher suites</string>
+    <string name="split_tunneling">Split Tunneling</string>
+    <string name="split_tunneling_description">Choose which apps use VPN</string>
+    <string name="auto_connect_settings">Auto-Connect</string>
+    <string name="auto_connect_on_boot">Connect on Boot</string>
+    <string name="auto_connect_on_boot_description">Automatically connect when device starts</string>
+    <string name="auto_connect_on_wifi">Connect on Wi-Fi</string>
+    <string name="auto_connect_on_wifi_description">Automatically connect when joining Wi-Fi</string>
+    <string name="debug_settings">Debug</string>
+    <string name="enable_logging">Enable Logging</string>
+    <string name="enable_logging_description">Save connection logs for troubleshooting</string>
+    <string name="log_directory">Log Directory</string>
+    <string name="log_directory_description">Choose where to save log files</string>
+
+    <!-- Home Screen -->
+    <string name="connection_statistics">Connection Statistics</string>
+    <string name="ip_address">IP Address</string>
+    <string name="server">Server</string>
+    <string name="data_sent">Data Sent</string>
+    <string name="data_received">Data Received</string>
+    <string name="duration">Duration</string>
+    <string name="enabled">Enabled</string>
+
+    <!-- About Screen -->
+    <string name="version_format">Version %1$s</string>
+    <string name="app_description">A lightweight VPN client for SoftEther VPN servers. Connect securely to your VPN server with ease.</string>
+    <string name="source_code">Source Code</string>
+    <string name="source_code_description">View on GitHub</string>
+    <string name="licenses">Open Source Licenses</string>
+    <string name="licenses_description">Third-party libraries used</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_description">How we handle your data</string>
+    <string name="build_info">Build Information</string>
+    <string name="version">Version</string>
+    <string name="build_number">Build Number</string>
+    <string name="build_type">Build Type</string>
+    <string name="credits">Based on Minimum VPN Client for SoftEther VPN\nby kittoku</string>
 </resources>

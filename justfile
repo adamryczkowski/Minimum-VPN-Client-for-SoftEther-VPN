@@ -265,3 +265,45 @@ doctor:
     echo ""
     echo "=== Connected Devices ==="
     adb devices 2>/dev/null || echo "adb not found"
+
+# === Emulator ===
+
+# Setup Android emulator for integration testing (~2GB download)
+emulator-setup: ensure-android-sdk
+    bash scripts/android-emulator-setup.sh
+
+# Check if emulator is ready
+emulator-check:
+    bash scripts/android-emulator-setup.sh --check
+
+# Start emulator in background (headless mode for CI)
+emulator-start:
+    bash scripts/android-emulator-control.sh start
+
+# Start emulator with GUI (for local development)
+emulator-start-gui:
+    bash scripts/android-emulator-control.sh start-gui
+
+# Stop running emulator
+emulator-stop:
+    bash scripts/android-emulator-control.sh stop
+
+# Wait for emulator to be fully booted
+emulator-wait:
+    bash scripts/android-emulator-control.sh wait
+
+# Show emulator status
+emulator-status:
+    bash scripts/android-emulator-control.sh status
+
+# List available AVDs
+emulator-list:
+    bash scripts/android-emulator-control.sh list
+
+# Full emulator workflow: setup, start, wait
+emulator-full: emulator-setup emulator-start emulator-wait
+    @echo "✅ Emulator is ready for testing"
+
+# Run instrumented tests on emulator (starts emulator if needed)
+test-on-emulator: emulator-start emulator-wait test-instrumented emulator-stop
+    @echo "✅ Instrumented tests completed"

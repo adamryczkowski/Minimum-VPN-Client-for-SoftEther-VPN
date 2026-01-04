@@ -14,12 +14,20 @@ import kittoku.mvc.testutil.RequiresVpnTestEnvironment
 import kittoku.mvc.testutil.TestClientBridge
 import kittoku.mvc.unit.ip.IPv4Packet
 import kittoku.mvc.unit.udp.UDPDatagram
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.nio.ByteBuffer
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -42,30 +50,88 @@ class MvcTest {
     @Nested
     @DisplayName("Integration Tests (require live server)")
     @RequiresVpnTestEnvironment
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class IntegrationTests {
+        @BeforeAll
+        fun setupSsl() {
+            // Install trust-all SSL context to allow connecting to servers with self-signed certs
+            TestClientBridge.installTrustAllSslContext()
+        }
+
         @Test
         @IntegrationTest
         @DisplayName("TCP connection to SoftEther server")
-        fun testControlClient() =
-            runTest {
-                val bridge = TestClientBridge.createFromEnvironment()
-                val client = ControlClient(bridge)
+        fun testControlClient() {
+            // Use a dedicated scope with SupervisorJob to prevent exception propagation
+            val caughtException = AtomicReference<Throwable?>(null)
+            val exceptionHandler =
+                CoroutineExceptionHandler { _, throwable ->
+                    caughtException.set(throwable)
+                }
+            val testJob = SupervisorJob()
+            val testScope = CoroutineScope(Dispatchers.IO + testJob + exceptionHandler)
 
-                client.run()
-                delay(10_000)
+            try {
+                runBlocking {
+                    val bridge =
+                        TestClientBridge.create(
+                            scope = testScope,
+                            exceptionHandler = exceptionHandler,
+                        )
+                    val client = ControlClient(bridge)
+
+                    client.run()
+                    delay(10_000)
+                }
+            } finally {
+                // Cancel all coroutines and wait for them to complete
+                testScope.cancel()
+                runBlocking {
+                    testJob.children.forEach { it.join() }
+                }
             }
+
+            // Check if there was an exception
+            caughtException.get()?.let { throw it }
+        }
 
         @Test
         @IntegrationTest
         @DisplayName("UDP acceleration connection to SoftEther server")
-        fun testControlClientUDP() =
-            runTest {
-                val bridge = TestClientBridge.createFromEnvironment(enableUdpAcceleration = true)
-                val client = ControlClient(bridge)
+        fun testControlClientUDP() {
+            // Use a dedicated scope with SupervisorJob to prevent exception propagation
+            val caughtException = AtomicReference<Throwable?>(null)
+            val exceptionHandler =
+                CoroutineExceptionHandler { _, throwable ->
+                    caughtException.set(throwable)
+                }
+            val testJob = SupervisorJob()
+            val testScope = CoroutineScope(Dispatchers.IO + testJob + exceptionHandler)
 
-                client.run()
-                delay(10_000)
+            try {
+                runBlocking {
+                    val bridge =
+                        TestClientBridge.create(
+                            scope = testScope,
+                            enableUdpAcceleration = true,
+                            exceptionHandler = exceptionHandler,
+                        )
+                    val client = ControlClient(bridge)
+
+                    client.run()
+                    delay(10_000)
+                }
+            } finally {
+                // Cancel all coroutines and wait for them to complete
+                testScope.cancel()
+                runBlocking {
+                    testJob.children.forEach { it.join() }
+                }
             }
+
+            // Check if there was an exception
+            caughtException.get()?.let { throw it }
+        }
     }
 
     @Nested

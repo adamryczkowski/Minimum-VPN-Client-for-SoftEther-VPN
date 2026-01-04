@@ -7,6 +7,11 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * Factory for creating [ClientBridge] instances configured for testing.
@@ -39,6 +44,42 @@ object TestClientBridge {
             13,
             21,
         )
+
+    /**
+     * Trust manager that accepts all certificates.
+     * WARNING: Only use for testing purposes!
+     */
+    private val trustAllCerts =
+        arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun checkClientTrusted(
+                    chain: Array<out X509Certificate>?,
+                    authType: String?,
+                ) {
+                    // Trust all clients
+                }
+
+                override fun checkServerTrusted(
+                    chain: Array<out X509Certificate>?,
+                    authType: String?,
+                ) {
+                    // Trust all servers
+                }
+
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            },
+        )
+
+    /**
+     * Installs a trust-all SSL context as the default.
+     * This allows connecting to servers with self-signed certificates.
+     * WARNING: Only use for testing purposes!
+     */
+    fun installTrustAllSslContext() {
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+        SSLContext.setDefault(sslContext)
+    }
 
     /**
      * Creates a [ClientBridge] configured for testing.
