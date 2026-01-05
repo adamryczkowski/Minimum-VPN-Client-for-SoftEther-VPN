@@ -1,0 +1,285 @@
+#!/usr/bin/env bash
+# Keystore management script for SoftEther Connect
+# Usage: ./scripts/keystore-manage.sh [command]
+#
+# Commands:
+#   generate    - Generate a new release keystore
+#   info        - Show keystore information
+#   verify      - Verify keystore configuration
+#   setup       - Interactive setup (generate + configure)
+
+set -euo pipefail
+
+KEYSTORE_FILE="release.keystore"
+KEYSTORE_PROPS="keystore.properties"
+KEYSTORE_PROPS_EXAMPLE="keystore.properties.example"
+KEY_ALIAS="softether-connect"
+KEY_VALIDITY=10000  # ~27 years
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+function print_info() {
+	echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+function print_success() {
+	echo -e "${GREEN}✅ $1${NC}"
+}
+
+function print_warning() {
+	echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+function print_error() {
+	echo -e "${RED}❌ $1${NC}"
+}
+
+# Check if keytool is available
+function check_keytool() {
+	if ! command -v keytool &>/dev/null; then
+		print_error "keytool not found. Make sure Java JDK is installed."
+		echo "   Install Java JDK or ensure JAVA_HOME/bin is in PATH"
+		exit 1
+	fi
+}
+
+# Generate a new keystore
+function cmd_generate() {
+	check_keytool
+
+	if [[ -f "$KEYSTORE_FILE" ]]; then
+		print_warning "Keystore already exists: $KEYSTORE_FILE"
+		read -rp "Overwrite? (y/N): " confirm
+		if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+			echo "Aborted."
+			exit 0
+		fi
+		rm -f "$KEYSTORE_FILE"
+	fi
+
+	echo ""
+	print_info "Generating new release keystore..."
+	echo ""
+	echo "You will be prompted for:"
+	echo "  1. Keystore password (remember this!)"
+	echo "  2. Key password (can be same as keystore password)"
+	echo "  3. Your name and organization details"
+	echo ""
+
+	# Generate keystore interactively
+	keytool -genkey -v \
+		-keystore "$KEYSTORE_FILE" \
+		-alias "$KEY_ALIAS" \
+		-keyalg RSA \
+		-keysize 2048 \
+		-validity "$KEY_VALIDITY"
+
+	if [[ -f "$KEYSTORE_FILE" ]]; then
+		echo ""
+		print_success "Keystore generated: $KEYSTORE_FILE"
+		echo ""
+		print_warning "IMPORTANT: Back up this file securely!"
+		print_warning "If you lose it, you cannot update your app on Google Play."
+		echo ""
+		echo "Next step: Run 'just keystore-setup-props' to configure keystore.properties"
+	else
+		print_error "Failed to generate keystore"
+		exit 1
+	fi
+}
+
+# Show keystore information
+function cmd_info() {
+	check_keytool
+
+	if [[ ! -f "$KEYSTORE_FILE" ]]; then
+		print_error "Keystore not found: $KEYSTORE_FILE"
+		echo "   Run 'just keystore-generate' to create one"
+		exit 1
+	fi
+
+	echo ""
+	print_info "Keystore information for: $KEYSTORE_FILE"
+	echo ""
+
+	keytool -list -v -keystore "$KEYSTORE_FILE" -alias "$KEY_ALIAS" 2>/dev/null || {
+		print_warning "Could not read keystore. You may need to enter the password."
+		keytool -list -keystore "$KEYSTORE_FILE"
+	}
+}
+
+# Verify keystore configuration
+function cmd_verify() {
+	echo ""
+	print_info "Verifying keystore configuration..."
+	echo ""
+
+	errors=0
+
+	# Check keystore file
+	if [[ -f "$KEYSTORE_FILE" ]]; then
+		print_success "Keystore file exists: $KEYSTORE_FILE"
+	else
+		print_error "Keystore file not found: $KEYSTORE_FILE"
+		errors=$((errors + 1))
+	fi
+
+	# Check keystore.properties
+	if [[ -f "$KEYSTORE_PROPS" ]]; then
+		print_success "Properties file exists: $KEYSTORE_PROPS"
+
+		# Verify properties content
+		if grep -q "your_keystore_password" "$KEYSTORE_PROPS" 2>/dev/null; then
+			print_warning "keystore.properties contains placeholder values"
+			print_warning "Update with your actual passwords"
+			errors=$((errors + 1))
+		fi
+
+		# Check storeFile path
+		store_file=$(grep "^storeFile=" "$KEYSTORE_PROPS" | cut -d'=' -f2)
+		if [[ -n "$store_file" && -f "$store_file" ]]; then
+			print_success "storeFile path is valid: $store_file"
+		elif [[ -n "$store_file" ]]; then
+			print_error "storeFile path not found: $store_file"
+			errors=$((errors + 1))
+		fi
+	else
+		print_error "Properties file not found: $KEYSTORE_PROPS"
+		echo "   Copy $KEYSTORE_PROPS_EXAMPLE and fill in values"
+		errors=$((errors + 1))
+	fi
+
+	echo ""
+	if [[ $errors -eq 0 ]]; then
+		print_success "Keystore configuration is valid!"
+	else
+		print_error "Found $errors error(s) in keystore configuration"
+		exit 1
+	fi
+}
+
+# Setup keystore.properties interactively
+function cmd_setup_props() {
+	if [[ ! -f "$KEYSTORE_FILE" ]]; then
+		print_error "Keystore not found: $KEYSTORE_FILE"
+		echo "   Run 'just keystore-generate' first"
+		exit 1
+	fi
+
+	echo ""
+	print_info "Setting up keystore.properties..."
+	echo ""
+
+	# Get passwords
+	read -rsp "Enter keystore password: " store_password
+	echo ""
+	read -rsp "Enter key password (press Enter if same as keystore): " key_password
+	echo ""
+
+	if [[ -z "$key_password" ]]; then
+		key_password="$store_password"
+	fi
+
+	# Create keystore.properties
+	cat > "$KEYSTORE_PROPS" << EOF
+# Release Keystore Configuration
+# Generated by: just keystore-setup-props
+# Date: $(date -Iseconds)
+#
+# DO NOT commit this file to version control!
+
+# Path to your keystore file (relative to project root or absolute)
+storeFile=$KEYSTORE_FILE
+
+# Keystore password
+storePassword=$store_password
+
+# Key alias
+keyAlias=$KEY_ALIAS
+
+# Key password
+keyPassword=$key_password
+EOF
+
+	print_success "Created $KEYSTORE_PROPS"
+	echo ""
+
+	# Verify the configuration
+	cmd_verify
+}
+
+# Interactive setup
+function cmd_setup() {
+	echo ""
+	echo "╔════════════════════════════════════════════════════════════╗"
+	echo "║         SoftEther Connect - Keystore Setup Wizard          ║"
+	echo "╚════════════════════════════════════════════════════════════╝"
+	echo ""
+
+	if [[ -f "$KEYSTORE_FILE" ]]; then
+		print_info "Existing keystore found: $KEYSTORE_FILE"
+		read -rp "Use existing keystore? (Y/n): " use_existing
+		if [[ "$use_existing" == "n" || "$use_existing" == "N" ]]; then
+			cmd_generate
+		fi
+	else
+		print_info "No keystore found. Generating new one..."
+		cmd_generate
+	fi
+
+	echo ""
+	cmd_setup_props
+}
+
+# Show help
+function cmd_help() {
+	echo "Keystore Management for SoftEther Connect"
+	echo ""
+	echo "Usage: $0 <command>"
+	echo ""
+	echo "Commands:"
+	echo "  generate     Generate a new release keystore"
+	echo "  info         Show keystore information"
+	echo "  verify       Verify keystore configuration"
+	echo "  setup-props  Configure keystore.properties (interactive)"
+	echo "  setup        Full interactive setup (generate + configure)"
+	echo "  help         Show this help message"
+	echo ""
+	echo "Examples:"
+	echo "  $0 setup       # Full interactive setup"
+	echo "  $0 generate    # Generate new keystore"
+	echo "  $0 verify      # Check configuration"
+}
+
+# Main
+case "${1:-help}" in
+	generate)
+		cmd_generate
+		;;
+	info)
+		cmd_info
+		;;
+	verify)
+		cmd_verify
+		;;
+	setup-props)
+		cmd_setup_props
+		;;
+	setup)
+		cmd_setup
+		;;
+	help | --help | -h)
+		cmd_help
+		;;
+	*)
+		print_error "Unknown command: $1"
+		echo ""
+		cmd_help
+		exit 1
+		;;
+esac

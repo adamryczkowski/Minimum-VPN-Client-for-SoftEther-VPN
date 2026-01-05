@@ -6,6 +6,7 @@
 # - All SDK components are stored in ANDROID_HOME (managed by mise)
 # - Components are shared across all projects using the same mise android-sdk version
 # - The script checks if each component is already installed before downloading
+# - For NDK, it also verifies the installation is healthy (critical binaries exist)
 #
 # Prerequisites:
 # - mise must be installed and activated
@@ -17,6 +18,7 @@ set -euo pipefail
 # Configuration
 ANDROID_PLATFORM="android-36"
 BUILD_TOOLS_VERSION="35.0.0"
+NDK_VERSION="27.0.12077973"
 
 # Colors for output
 RED='\033[0;31m'
@@ -76,6 +78,71 @@ function is_component_installed() {
 	sdkmanager --list_installed 2>/dev/null | grep -q "$component"
 }
 
+# Check if NDK installation is healthy
+# Returns 0 if healthy, 1 if broken or missing
+function is_ndk_healthy() {
+	local ndk_version="$1"
+	local ndk_path="${ANDROID_HOME}/ndk/${ndk_version}"
+	local llvm_bin="${ndk_path}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+
+	# Check if NDK directory exists
+	if [[ ! -d "$ndk_path" ]]; then
+		log_warn "NDK directory not found: $ndk_path"
+		return 1
+	fi
+
+	# Check if critical LLVM binaries exist and are executable
+	# These are required for stripping debug symbols during release builds
+	local critical_binaries=(
+		"llvm-objcopy"
+		"llvm-ar"
+		"clang"
+	)
+
+	for binary in "${critical_binaries[@]}"; do
+		local binary_path="${llvm_bin}/${binary}"
+		if [[ -L "$binary_path" ]]; then
+			# It's a symlink - check if target exists
+			local target
+			target=$(readlink -f "$binary_path" 2>/dev/null || echo "")
+			if [[ -z "$target" ]] || [[ ! -f "$target" ]]; then
+				log_warn "NDK binary is a broken symlink: $binary_path"
+				return 1
+			fi
+		elif [[ ! -f "$binary_path" ]]; then
+			log_warn "NDK binary not found: $binary_path"
+			return 1
+		fi
+
+		if [[ ! -x "$binary_path" ]]; then
+			log_warn "NDK binary not executable: $binary_path"
+			return 1
+		fi
+	done
+
+	return 0
+}
+
+# Reinstall NDK (uninstall then install)
+function reinstall_ndk() {
+	local ndk_component="$1"
+
+	log_warn "Reinstalling NDK due to corrupted installation..."
+
+	# Uninstall first
+	log_info "Uninstalling $ndk_component..."
+	yes | sdkmanager --uninstall "$ndk_component" 2>/dev/null || true
+
+	# Install fresh
+	log_info "Installing $ndk_component..."
+	yes | sdkmanager "$ndk_component" || {
+		log_error "Failed to install $ndk_component"
+		return 1
+	}
+
+	log_info "✓ $ndk_component (reinstalled)"
+}
+
 # Install SDK components
 function install_sdk_components() {
 	local components=(
@@ -100,6 +167,44 @@ function install_sdk_components() {
 	done
 }
 
+# Install and verify NDK
+function install_ndk() {
+	local ndk_component="ndk;${NDK_VERSION}"
+
+	log_info "Checking NDK..."
+
+	if is_component_installed "$ndk_component"; then
+		# NDK is installed, but check if it's healthy
+		if is_ndk_healthy "$NDK_VERSION"; then
+			log_info "✓ $ndk_component (already installed and healthy)"
+			return 0
+		else
+			# NDK is broken, reinstall it
+			reinstall_ndk "$ndk_component" || return 1
+
+			# Verify the reinstalled NDK is healthy
+			if ! is_ndk_healthy "$NDK_VERSION"; then
+				log_error "NDK reinstallation failed - still unhealthy"
+				return 1
+			fi
+		fi
+	else
+		# NDK not installed, install it
+		log_info "Installing $ndk_component..."
+		yes | sdkmanager "$ndk_component" || {
+			log_error "Failed to install $ndk_component"
+			return 1
+		}
+		log_info "✓ $ndk_component (installed)"
+
+		# Verify the installation is healthy
+		if ! is_ndk_healthy "$NDK_VERSION"; then
+			log_error "NDK installation is unhealthy after install"
+			return 1
+		fi
+	fi
+}
+
 # Accept licenses
 function accept_licenses() {
 	log_info "Accepting Android SDK licenses..."
@@ -121,10 +226,14 @@ function main() {
 	# Install components
 	install_sdk_components || exit 1
 
+	# Install and verify NDK
+	install_ndk || exit 1
+
 	log_info "=== Android SDK Setup Complete ==="
 	log_info "ANDROID_HOME: $ANDROID_HOME"
 	log_info "Platform: $ANDROID_PLATFORM"
 	log_info "Build Tools: $BUILD_TOOLS_VERSION"
+	log_info "NDK: $NDK_VERSION"
 }
 
 main "$@"

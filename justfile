@@ -17,7 +17,7 @@ setup-full: mise-install ensure-android-sdk install-hooks
     @echo "✅ Full development environment ready!"
 
 # Setup development environment (assumes tools already installed)
-setup: install-hooks
+setup: install-hooks ensure-android-sdk
     ./gradlew dependencies
     @echo "Development environment ready!"
 
@@ -337,6 +337,28 @@ version-bump-minor:
 version-bump-major:
     bash scripts/version-bump.sh major
 
+# === Keystore Management ===
+
+# Full interactive keystore setup (generate + configure)
+keystore-setup:
+    bash scripts/keystore-manage.sh setup
+
+# Generate a new release keystore
+keystore-generate:
+    bash scripts/keystore-manage.sh generate
+
+# Configure keystore.properties interactively
+keystore-setup-props:
+    bash scripts/keystore-manage.sh setup-props
+
+# Show keystore information
+keystore-info:
+    bash scripts/keystore-manage.sh info
+
+# Verify keystore configuration
+keystore-verify:
+    bash scripts/keystore-manage.sh verify
+
 # === Release ===
 
 # Build release APK and AAB (requires keystore.properties)
@@ -362,14 +384,32 @@ release-check:
     set -euo pipefail
     echo "🔍 Checking release prerequisites..."
     errors=0
+    warnings=0
+
+    # Check keystore file
+    if [[ ! -f release.keystore ]]; then
+        echo "⚠️  release.keystore not found"
+        echo "   Run 'just keystore-setup' to generate one"
+        warnings=$((warnings + 1))
+    else
+        echo "✅ release.keystore found"
+    fi
 
     # Check keystore.properties
     if [[ ! -f keystore.properties ]]; then
         echo "❌ keystore.properties not found"
-        echo "   Copy keystore.properties.example and fill in values"
+        echo "   Run 'just keystore-setup' for interactive setup, or:"
+        echo "   cp keystore.properties.example keystore.properties"
         errors=$((errors + 1))
     else
-        echo "✅ keystore.properties found"
+        # Check for placeholder values
+        if grep -q "your_keystore_password" keystore.properties 2>/dev/null; then
+            echo "⚠️  keystore.properties has placeholder passwords"
+            echo "   Run 'just keystore-setup-props' to configure"
+            warnings=$((warnings + 1))
+        else
+            echo "✅ keystore.properties configured"
+        fi
     fi
 
     # Check version.properties
@@ -387,14 +427,18 @@ release-check:
         echo "✅ proguard-rules.pro found"
     fi
 
-    if [[ $errors -gt 0 ]]; then
-        echo ""
-        echo "❌ Release check failed with $errors error(s)"
-        exit 1
-    fi
-
     echo ""
-    echo "✅ All release prerequisites met"
+    if [[ $errors -gt 0 ]]; then
+        echo "❌ Release check failed with $errors error(s)"
+        echo ""
+        echo "💡 Quick fix: Run 'just keystore-setup' for guided setup"
+        exit 1
+    elif [[ $warnings -gt 0 ]]; then
+        echo "⚠️  Release check passed with $warnings warning(s)"
+        echo "   The build may work but signing might not be configured correctly."
+    else
+        echo "✅ All release prerequisites met"
+    fi
 
 # Build release APK only
 release-apk: release-check
