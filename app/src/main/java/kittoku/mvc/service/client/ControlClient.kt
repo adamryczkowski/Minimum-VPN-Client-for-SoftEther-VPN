@@ -132,6 +132,10 @@ internal class ControlClient(
                 // Establish VPN connection
                 tcpTerminal.setTimeoutForData()
                 ipTerminal.initializeBuilder()
+
+                // Pass ARP client to IP terminal for MAC address resolution
+                ipTerminal.arpClient = arpClient
+
                 ipTerminal.launchJobRetrieve()
                 launchJobOutgoing()
                 launchJobTCPIncoming()
@@ -174,9 +178,15 @@ internal class ControlClient(
         jobTCPIncoming =
             bridge.scope.launch(bridge.handler) {
                 while (isActive) {
-                    tcpTerminal.consumeIPPacketBuffer {
-                        ipTerminal.feedIncomingPacket(it)
-                    }
+                    tcpTerminal.consumeIPAndArpPackets(
+                        ipHandler = { buffer ->
+                            ipTerminal.feedIncomingPacket(buffer)
+                        },
+                        arpHandler = { frame ->
+                            // Handle incoming ARP packets for MAC resolution
+                            arpClient.handleIncomingArpPacket(frame)
+                        },
+                    )
                 }
             }
     }

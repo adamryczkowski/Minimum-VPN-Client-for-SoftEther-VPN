@@ -9,6 +9,7 @@ import kittoku.mvc.extension.toHexByteArray
 import kittoku.mvc.extension.toHexString
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.*
+import kittoku.mvc.service.client.arp.ArpTable
 import kittoku.mvc.service.terminal.udp.CHACHA20_POLY1305_NONCE_SIZE
 import kittoku.mvc.service.terminal.udp.CHACHA20_POLY1305_TAG_SIZE
 import kittoku.mvc.service.terminal.udp.UDPStatus
@@ -140,6 +141,9 @@ internal class ClientBridge(internal val scope: CoroutineScope, internal val han
     internal val softEtherChannel = Channel<HttpMessage>(1)
     internal val dhcpChannel = Channel<EthernetFrame>(1)
     internal val arpChannel = Channel<EthernetFrame>(1)
+
+    /** ARP table for caching IP-to-MAC address mappings for on-subnet hosts */
+    internal val arpTable = ArpTable()
 
     internal var isLogEnabled = false
     internal var logDirectory: Uri? = null

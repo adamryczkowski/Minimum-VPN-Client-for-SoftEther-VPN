@@ -10,7 +10,9 @@ import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlMessage
 import kittoku.mvc.service.terminal.isEchoFrame
 import kittoku.mvc.service.terminal.isToMeFrame
+import kittoku.mvc.unit.ethernet.ETHERNET_BROADCAST_ADDRESS
 import kittoku.mvc.unit.ethernet.ETHERNET_MAC_ADDRESS_SIZE
+import kittoku.mvc.unit.ethernet.ETHER_TYPE_ARP
 import kittoku.mvc.unit.ethernet.ETHER_TYPE_IPv4
 import kittoku.mvc.unit.ethernet.EthernetFrame
 import kittoku.mvc.unit.http.HttpMessage
@@ -383,6 +385,86 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
 
             incomingBuffer.limit(currentLimit)
         }
+    }
+
+    /**
+     * Consumes incoming frames and handles both IP packets and ARP packets.
+     * IP packets are passed to the ipHandler, ARP frames are passed to the arpHandler.
+     *
+     * @param ipHandler Handler for IP packet buffers
+     * @param arpHandler Handler for ARP Ethernet frames
+     */
+    internal suspend fun consumeIPAndArpPackets(
+        ipHandler: suspend (ByteBuffer) -> Unit,
+        arpHandler: suspend (EthernetFrame) -> Unit,
+    ) {
+        consumeFramePack {
+            val frameLength = incomingBuffer.int
+            val startFrame = incomingBuffer.position()
+            val stopFrame = startFrame + frameLength
+            val currentLimit = incomingBuffer.limit()
+            incomingBuffer.limit(stopFrame)
+
+            // Check if frame is addressed to us or is a broadcast
+            val isBroadcast = isBroadcastFrame(incomingBuffer)
+            val isToMe = isToMeFrame(incomingBuffer, bridge.clientMacAddress)
+
+            if (!(isToMe || isBroadcast)) {
+                incomingBuffer.position(stopFrame)
+                incomingBuffer.limit(currentLimit)
+                return@consumeFramePack
+            }
+
+            // Skip destination MAC
+            incomingBuffer.move(ETHERNET_MAC_ADDRESS_SIZE)
+            // Skip source MAC
+            incomingBuffer.move(ETHERNET_MAC_ADDRESS_SIZE)
+
+            // Read EtherType
+            val etherType = incomingBuffer.short
+
+            when (etherType) {
+                ETHER_TYPE_IPv4 -> {
+                    if (isEchoFrame(incomingBuffer)) {
+                        bridge.controlMailbox.send(ControlMessage.SECURE_NAT_ECHO_REQUEST)
+                    }
+                    ipHandler(incomingBuffer)
+                }
+
+                ETHER_TYPE_ARP -> {
+                    // Need to parse full frame for ARP handling
+                    incomingBuffer.position(startFrame)
+                    incomingBuffer.move(-Int.SIZE_BYTES) // Include length for frame parsing
+                    val frame = EthernetFrame()
+                    try {
+                        frame.read(incomingBuffer)
+                        arpHandler(frame)
+                    } catch (e: Exception) {
+                        // Invalid frame, skip
+                    }
+                }
+
+                else -> {
+                    // Unknown EtherType, discard
+                }
+            }
+
+            incomingBuffer.position(stopFrame)
+            incomingBuffer.limit(currentLimit)
+        }
+    }
+
+    /**
+     * Checks if the frame is a broadcast frame.
+     */
+    private fun isBroadcastFrame(buffer: ByteBuffer): Boolean {
+        val startPos = buffer.position()
+        for (i in 0 until ETHERNET_MAC_ADDRESS_SIZE) {
+            if (buffer.get(startPos + i) != ETHERNET_BROADCAST_ADDRESS[i]) {
+                return false
+            }
+        }
+        return true
     }
 
     internal fun loadOutgoingPacket(buffer: ByteBuffer) {
