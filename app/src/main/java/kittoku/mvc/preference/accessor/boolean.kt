@@ -11,6 +11,7 @@ internal fun getBooleanPrefValue(
         when (key) {
             MvcPreference.HOME_CONNECTOR,
             MvcPreference.SSL_DO_SELECT_SUITES,
+            MvcPreference.SSL_SKIP_VERIFY,
             MvcPreference.UDP_ENABLE_ACCELERATION,
             MvcPreference.LOG_DO_SAVE_LOG,
             -> false

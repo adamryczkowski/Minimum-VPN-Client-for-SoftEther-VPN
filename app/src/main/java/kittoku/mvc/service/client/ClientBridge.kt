@@ -120,6 +120,7 @@ internal class ClientBridge(internal val scope: CoroutineScope, internal val han
     internal var sslVersion = "DEFAULT"
     internal var doSelectCipherSuites = false
     internal val selectedCipherSuites = mutableListOf<String>()
+    internal var skipCertVerify = false
 
     internal var udpAccelerationConfig: UDPAccelerationConfig? = null
 
@@ -159,6 +160,7 @@ internal class ClientBridge(internal val scope: CoroutineScope, internal val han
         if (doSelectCipherSuites) {
             getSetPrefValue(MvcPreference.SSL_SUITES, prefs).forEach { selectedCipherSuites.add(it) }
         }
+        skipCertVerify = getBooleanPrefValue(MvcPreference.SSL_SKIP_VERIFY, prefs)
 
         if (getBooleanPrefValue(MvcPreference.UDP_ENABLE_ACCELERATION, prefs)) {
             udpAccelerationConfig = UDPAccelerationConfig(random)

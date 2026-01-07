@@ -1,0 +1,57 @@
+---
+# VPN Connect Only Flow
+# This flow connects to VPN and leaves it connected
+# Used by vpn-e2e-test.sh to capture VPN info while connected
+#
+# Prerequisites:
+# - Android emulator running
+# - App installed
+# - VPN credentials configured via scripts/set-vpn-prefs.sh
+appId: kittoku.mvc
+---
+
+# Step 1: Launch the app (don't clear state - credentials are pre-configured)
+  - launchApp:
+      appId: kittoku.mvc
+      stopApp: false
+
+# Step 2: Wait for app to load
+  - assertVisible: HOME
+
+# Step 3: Verify credentials are configured (hostname should be visible)
+  - assertNotVisible: '[No Value Entered]'
+
+# Step 4: Take screenshot of initial state
+  - takeScreenshot: screenshots/vpn-e2e-01-initial.png
+
+# Step 5: Toggle Connect switch
+  - tapOn: Connect
+
+# Step 6: Handle VPN permission dialog if it appears
+  - runFlow:
+      when:
+        visible: Connection request
+      commands:
+        - tapOn: OK
+
+# Alternative: Handle different VPN permission dialog text
+  - runFlow:
+      when:
+        visible: Allow
+      commands:
+        - tapOn: Allow
+
+# Step 7: Wait for connection to establish (up to 30 seconds)
+# When connected, the UI shows "[Assigned IP Address]" with the VPN IP
+  - extendedWaitUntil:
+      visible:
+        text: .*Assigned IP Address.*|.*192\.168\..*
+      timeout: 30000
+
+# Step 8: Verify connection status changed - no longer showing "No Connection"
+  - assertNotVisible: '[No Connection Established]'
+
+# Step 10: Take screenshot of connected state with stats visible
+  - takeScreenshot: screenshots/vpn-e2e-02-connected.png
+
+# VPN is now connected - test script will capture VPN info from screenshot

@@ -22,8 +22,12 @@ import kotlinx.coroutines.sync.withLock
 import java.net.SocketTimeoutException
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 internal class TCPTerminal(private val bridge: ClientBridge) {
     private val socket: SSLSocket
@@ -43,7 +47,33 @@ internal class TCPTerminal(private val bridge: ClientBridge) {
     private val mutex = Mutex()
 
     init {
-        val socketFactory = SSLSocketFactory.getDefault()
+        val socketFactory: SSLSocketFactory =
+            if (bridge.skipCertVerify) {
+                // Create a trust manager that does not validate certificate chains
+                val trustAllCerts =
+                    arrayOf<TrustManager>(
+                        object : X509TrustManager {
+                            override fun checkClientTrusted(
+                                chain: Array<X509Certificate>,
+                                authType: String,
+                            ) {}
+
+                            override fun checkServerTrusted(
+                                chain: Array<X509Certificate>,
+                                authType: String,
+                            ) {}
+
+                            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                        },
+                    )
+
+                // Install the all-trusting trust manager
+                val sslContext = SSLContext.getInstance("TLS")
+                sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+                sslContext.socketFactory as SSLSocketFactory
+            } else {
+                SSLSocketFactory.getDefault() as SSLSocketFactory
+            }
 
         socket = socketFactory.createSocket(bridge.serverHostname, bridge.serverPort) as SSLSocket
 

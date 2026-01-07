@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Minimum VPN Client for SoftEther VPN</string>
-    <string name="app_name_short">Minimum VPN Client</string>
+    <string name="app_name">SoftEther Connect</string>
+    <string name="app_name_short">SoftEther Connect</string>
 
     <!-- Profile Management -->
     <string name="profiles">Profiles</string>

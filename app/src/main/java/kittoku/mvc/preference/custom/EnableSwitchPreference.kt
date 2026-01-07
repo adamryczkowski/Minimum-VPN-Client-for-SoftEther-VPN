@@ -31,3 +31,8 @@ internal class LogDoSaveLogPreference(context: Context, attrs: AttributeSet) : E
     override val mvcPreference = MvcPreference.LOG_DO_SAVE_LOG
     override val preferenceTitle = "Save Log"
 }
+
+internal class SslSkipVerifyPreference(context: Context, attrs: AttributeSet) : EnableSwitchPreference(context, attrs) {
+    override val mvcPreference = MvcPreference.SSL_SKIP_VERIFY
+    override val preferenceTitle = "Skip Certificate Verification (Insecure)"
+}

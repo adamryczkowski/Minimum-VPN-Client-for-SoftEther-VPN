@@ -308,6 +308,34 @@ emulator-full: emulator-setup emulator-start emulator-wait
 test-on-emulator: emulator-start emulator-wait test-instrumented emulator-stop
     @echo "✅ Instrumented tests completed"
 
+# === E2E Testing (Maestro) ===
+
+# Install Maestro for E2E UI testing
+maestro-install:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if command -v maestro &>/dev/null || [ -x "$HOME/.maestro/bin/maestro" ]; then
+        echo "✅ Maestro already installed"
+        "$HOME/.maestro/bin/maestro" --version || maestro --version
+    else
+        echo "📦 Installing Maestro..."
+        curl -fsSL "https://get.maestro.mobile.dev" | bash
+        echo "✅ Maestro installed"
+        echo "   Add to PATH: export PATH=\"\$PATH:\$HOME/.maestro/bin\""
+    fi
+
+# Run E2E VPN connectivity test using Maestro
+test-vpn-e2e: test-env-check
+    bash scripts/vpn-e2e-test.sh
+
+# Check E2E test prerequisites only
+test-vpn-e2e-check: test-env-check
+    bash scripts/vpn-e2e-test.sh --check-only
+
+# Run E2E test without IP verification
+test-vpn-e2e-quick: test-env-check
+    bash scripts/vpn-e2e-test.sh --skip-ip-check
+
 # === Version Management ===
 
 # Show current version

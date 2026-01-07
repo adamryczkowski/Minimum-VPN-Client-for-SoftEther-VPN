@@ -1,0 +1,31 @@
+---
+# VPN Disconnect Only Flow
+# This flow disconnects from VPN (assumes VPN is already connected)
+# Used by vpn-e2e-test.sh after capturing VPN info
+#
+# Prerequisites:
+# - Android emulator running
+# - App installed
+# - VPN currently connected
+appId: kittoku.mvc
+---
+
+# Step 1: Launch the app (don't clear state)
+  - launchApp:
+      appId: kittoku.mvc
+      stopApp: false
+
+# Step 2: Wait for app to load
+  - assertVisible: HOME
+
+# Step 3: Disconnect - tap the Connect toggle
+  - tapOn: Connect
+
+# Step 4: Wait for disconnection (allow more time for graceful disconnect)
+  - extendedWaitUntil:
+      visible:
+        text: .*No Connection.*|.*Disconnected.*
+      timeout: 60000
+
+# Step 5: Take screenshot of final state
+  - takeScreenshot: screenshots/vpn-e2e-03-final.png

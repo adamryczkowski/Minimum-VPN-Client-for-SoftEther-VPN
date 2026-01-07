@@ -33,3 +33,8 @@ keystore.properties
 
 # Local planning documents
 /plans/
+
+# Test artifacts (logs and screenshots)
+/logs/
+/screenshots/
+/maestro/screenshots/

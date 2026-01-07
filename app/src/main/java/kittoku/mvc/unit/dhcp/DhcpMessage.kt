@@ -11,6 +11,7 @@ import kotlin.math.max
 internal class DhcpMessage : DataUnit {
     internal var opcode: Byte = 0
     internal var transactionId = 0
+    internal var flags: Short = 0 // Bit 15 = BROADCAST flag (0x8000)
 
     internal val clientIpAddress = ByteArray(4)
     internal val yourIpAddress = ByteArray(4)
@@ -19,6 +20,11 @@ internal class DhcpMessage : DataUnit {
     internal val clientMacAddress = ByteArray(6)
 
     internal var options = OptionPack()
+
+    companion object {
+        // DHCP flags - bit 15 is the BROADCAST flag
+        const val FLAG_BROADCAST: Short = 0x8000.toShort()
+    }
 
     private val lengthBeforePadded: Int
         get() = 240 + options.length
@@ -36,7 +42,7 @@ internal class DhcpMessage : DataUnit {
 
         buffer.putInt(transactionId)
         buffer.putShort(0) // secs
-        buffer.putShort(0) // flags
+        buffer.putShort(flags) // flags - bit 15 is BROADCAST flag
 
         buffer.put(clientIpAddress)
         buffer.put(yourIpAddress)

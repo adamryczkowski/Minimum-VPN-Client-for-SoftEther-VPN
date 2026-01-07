@@ -3,6 +3,7 @@
     <PreferenceCategory android:title="SSL Layer">
         <kittoku.mvc.preference.custom.SslPortPreference android:key="SSL_PORT"/>
         <kittoku.mvc.preference.custom.SslVersionPreference android:key="SSL_VERSION"/>
+        <kittoku.mvc.preference.custom.SslSkipVerifyPreference android:key="SSL_SKIP_VERIFY"/>
         <kittoku.mvc.preference.custom.SslDoSelectSuitesPreference android:key="SSL_DO_SELECT_SUITES"/>
         <kittoku.mvc.preference.custom.SslSuitesPreference android:key="SSL_SUITES"/>
     </PreferenceCategory>

@@ -10,6 +10,7 @@ import kittoku.mvc.debug.assertAlways
 import kittoku.mvc.extension.*
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.setBooleanPrefValue
+import kittoku.mvc.preference.accessor.setStringPrefValue
 import kittoku.mvc.service.CHANNEL_ID
 import kittoku.mvc.service.client.arp.ARPClient
 import kittoku.mvc.service.client.dhcp.DhcpClient
@@ -273,14 +274,17 @@ internal class ControlClient(
                 if (!isClosing) {
                     if (throwable != null) {
                         // report exception first
-                        var message = "Disconnected because of "
-
-                        message +=
+                        val errorDetail =
                             if (throwable is MvcException) {
-                                throwable.message
+                                throwable.message ?: "Unknown MVC error"
                             } else {
-                                "UNKNOWN EXCEPTION/ERROR"
+                                // For non-MvcException, include the exception type and message for debugging
+                                val exceptionType = throwable::class.simpleName ?: "Unknown"
+                                val exceptionMessage = throwable.message ?: "No message"
+                                "$exceptionType: $exceptionMessage"
                             }
+
+                        val message = "Disconnected because of $errorDetail"
 
                         notify(message)
                         logWriter?.reportThrowable(throwable)
@@ -301,6 +305,24 @@ internal class ControlClient(
 
                     PreferenceManager.getDefaultSharedPreferences(bridge.service).also {
                         setBooleanPrefValue(false, MvcPreference.HOME_CONNECTOR, it)
+
+                        // Update HOME_STATUS with disconnect reason so user can see why connection failed
+                        val statusMessage =
+                            if (throwable != null) {
+                                val errorDetail =
+                                    if (throwable is MvcException) {
+                                        throwable.message ?: "Unknown MVC error"
+                                    } else {
+                                        // For non-MvcException, include the exception type and message for debugging
+                                        val exceptionType = throwable::class.simpleName ?: "Unknown"
+                                        val exceptionMessage = throwable.message ?: "No message"
+                                        "$exceptionType: $exceptionMessage"
+                                    }
+                                "Disconnected: $errorDetail"
+                            } else {
+                                "" // Empty string will show "[No Connection Established]"
+                            }
+                        setStringPrefValue(statusMessage, MvcPreference.HOME_STATUS, it)
                     }
 
                     if (throwable == null) {
