@@ -421,11 +421,13 @@ All unit tests in `app/src/test/` use JUnit 5 (`org.junit.jupiter`) exclusively.
 
 ---
 
-## Milestone 10: Extract Log Export from VpnLogger (LOW)
+## Milestone 10: Extract Log Export from VpnLogger (LOW) ✅ COMPLETED
 
 **Goal:** Improve separation of concerns in logging module.
 
 **Estimated Effort:** 1 day
+
+**Status:** Completed on 8th January 2025
 
 ### 10.1 Current State
 
@@ -433,25 +435,33 @@ All unit tests in `app/src/test/` use JUnit 5 (`org.junit.jupiter`) exclusively.
 
 - Logging to Android Log
 - Log buffering
-- Log export (JSON and text)
+- ~~Log export (JSON and text)~~ → Deprecated, delegated to `DiagnosticExporter`
 - Global context management
 - Listener management
 
-### 10.2 Refactoring Plan
+### 10.2 Changes Made
 
-**Changes Required:**
+**Refactoring Approach:** Instead of removing the export methods entirely, they were deprecated with `@Deprecated` annotations pointing to `DiagnosticExporter`. This maintains backward compatibility while encouraging migration to the new API.
 
 | File | Change |
 |------|--------|
-| [`VpnLogger.kt`](../app/src/main/java/kittoku/mvc/logging/VpnLogger.kt) | Remove export methods, delegate to `DiagnosticExporter` |
-| [`DiagnosticExporter.kt`](../app/src/main/java/kittoku/mvc/logging/DiagnosticExporter.kt) | Add methods to export from `VpnLogger` buffer |
+| [`VpnLogger.kt`](../app/src/main/java/kittoku/mvc/logging/VpnLogger.kt) | Deprecated `exportLogsAsJson()` and `exportLogsAsText()` with `@Deprecated` annotations pointing to `DiagnosticExporter` |
+| [`DiagnosticExporter.kt`](../app/src/main/java/kittoku/mvc/logging/DiagnosticExporter.kt) | Added `exportLogsAsJson(pretty, minLevel)` and `exportLogsAsText(minLevel)` methods with optional log level filtering |
+| [`VpnLoggerTest.kt`](../app/src/test/java/kittoku/mvc/logging/VpnLoggerTest.kt) | Updated Export tests with `@Suppress("DEPRECATION")` annotations |
+| [`DiagnosticExporterTest.kt`](../app/src/test/java/kittoku/mvc/logging/DiagnosticExporterTest.kt) | New test file with comprehensive tests for export functionality |
 
-**Unit Tests:**
+**New Features in DiagnosticExporter:**
 
-| Test File | Test Cases |
-|-----------|------------|
-| [`VpnLoggerTest.kt`](../app/src/test/java/kittoku/mvc/logging/VpnLoggerTest.kt) | Update to verify delegation |
-| New: `DiagnosticExporterTest.kt` | Test export functionality |
+- `exportLogsAsJson(pretty: Boolean = false, minLevel: LogLevel? = null)` - Export logs as JSON with optional level filtering
+- `exportLogsAsText(minLevel: LogLevel? = null)` - Export logs as text with optional level filtering
+
+**Validation Criteria:**
+
+- [x] `DiagnosticExporter` has log export methods
+- [x] `VpnLogger` export methods are deprecated with proper annotations
+- [x] New `DiagnosticExporterTest.kt` covers export functionality
+- [x] Backward compatibility tests verify same output
+- [x] Optional log level filtering added to new API
 
 ---
 

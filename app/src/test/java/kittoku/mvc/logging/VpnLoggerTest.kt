@@ -267,10 +267,11 @@ class VpnLoggerTest {
     }
 
     @Nested
-    @DisplayName("Export")
+    @DisplayName("Export (Deprecated)")
     inner class Export {
         @Test
-        @DisplayName("should export logs as JSON")
+        @DisplayName("should export logs as JSON (deprecated - use DiagnosticExporter)")
+        @Suppress("DEPRECATION")
         fun exportAsJson() {
             val logger = VpnLogger.getLogger<VpnLoggerTest>()
             logger.info("Test message", "key" to "value")
@@ -283,7 +284,8 @@ class VpnLoggerTest {
         }
 
         @Test
-        @DisplayName("should export logs as text")
+        @DisplayName("should export logs as text (deprecated - use DiagnosticExporter)")
+        @Suppress("DEPRECATION")
         fun exportAsText() {
             val logger = VpnLogger.getLogger<VpnLoggerTest>()
             logger.info("Test message", "key" to "value")

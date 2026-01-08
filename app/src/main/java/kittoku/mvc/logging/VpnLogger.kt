@@ -364,7 +364,18 @@ class VpnLogger private constructor(
 
         /**
          * Export logs as JSON array.
+         *
+         * @deprecated Use DiagnosticExporter.exportLogsAsJson() instead for better separation of concerns.
+         * @see DiagnosticExporter.exportLogsAsJson
          */
+        @Deprecated(
+            message = "Use DiagnosticExporter.exportLogsAsJson() instead",
+            replaceWith =
+                ReplaceWith(
+                    "DiagnosticExporter(context).exportLogsAsJson(pretty)",
+                    "kittoku.mvc.logging.DiagnosticExporter",
+                ),
+        )
         fun exportLogsAsJson(pretty: Boolean = false): String {
             val logs = getBufferedLogs()
             return if (pretty) {
@@ -376,7 +387,18 @@ class VpnLogger private constructor(
 
         /**
          * Export logs as text.
+         *
+         * @deprecated Use DiagnosticExporter.exportLogsAsText() instead for better separation of concerns.
+         * @see DiagnosticExporter.exportLogsAsText
          */
+        @Deprecated(
+            message = "Use DiagnosticExporter.exportLogsAsText() instead",
+            replaceWith =
+                ReplaceWith(
+                    "DiagnosticExporter(context).exportLogsAsText()",
+                    "kittoku.mvc.logging.DiagnosticExporter",
+                ),
+        )
         fun exportLogsAsText(): String {
             return getBufferedLogs().joinToString("\n") { it.toLogLine() }
         }

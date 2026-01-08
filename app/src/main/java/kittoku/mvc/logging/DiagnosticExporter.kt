@@ -217,6 +217,46 @@ class DiagnosticExporter(
         )
     }
 
+    /**
+     * Export buffered logs as JSON array.
+     *
+     * @param pretty Whether to format with indentation
+     * @param minLevel Optional minimum log level filter
+     * @return JSON string containing log events
+     */
+    fun exportLogsAsJson(
+        pretty: Boolean = false,
+        minLevel: LogLevel? = null,
+    ): String {
+        val logs =
+            if (minLevel != null) {
+                VpnLogger.getBufferedLogs(minLevel)
+            } else {
+                VpnLogger.getBufferedLogs()
+            }
+        return if (pretty) {
+            "[\n${logs.joinToString(",\n") { it.toJson(true) }}\n]"
+        } else {
+            "[${logs.joinToString(",") { it.toJson(false) }}]"
+        }
+    }
+
+    /**
+     * Export buffered logs as human-readable text.
+     *
+     * @param minLevel Optional minimum log level filter
+     * @return Text string with one log event per line
+     */
+    fun exportLogsAsText(minLevel: LogLevel? = null): String {
+        val logs =
+            if (minLevel != null) {
+                VpnLogger.getBufferedLogs(minLevel)
+            } else {
+                VpnLogger.getBufferedLogs()
+            }
+        return logs.joinToString("\n") { it.toLogLine() }
+    }
+
     companion object {
         private const val MAX_LOG_ENTRIES = 500
     }
