@@ -3,9 +3,9 @@ package kittoku.mvc.viewmodel
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kittoku.mvc.connection.ConnectionState
 import kittoku.mvc.repository.VpnConnectionRepository
 import kittoku.mvc.service.VpnConnectionManager
-import kittoku.mvc.service.contract.ConnectionState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted

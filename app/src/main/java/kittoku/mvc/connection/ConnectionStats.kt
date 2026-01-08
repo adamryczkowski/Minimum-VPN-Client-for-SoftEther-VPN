@@ -8,6 +8,9 @@ import java.util.Locale
  *
  * This class holds all the statistics related to an active VPN connection,
  * including traffic data, timing information, and connection details.
+ *
+ * This is the canonical ConnectionStats class - all other duplicates should
+ * import from this package (kittoku.mvc.connection).
  */
 data class ConnectionStats(
     /** Timestamp when the connection was established (milliseconds since epoch) */
@@ -30,6 +33,27 @@ data class ConnectionStats(
     /** Total bytes transferred (sent + received) */
     val totalBytes: Long
         get() = bytesSent + bytesReceived
+
+    /**
+     * Alias for [assignedIp] for compatibility with code expecting this property name.
+     * Prefer using [assignedIp] for new code.
+     */
+    val assignedIpAddress: String?
+        get() = assignedIp.ifEmpty { null }
+
+    /**
+     * Alias for [serverAddress] for compatibility with code expecting this property name.
+     * Prefer using [serverAddress] for new code.
+     */
+    val serverHostname: String?
+        get() = serverAddress.ifEmpty { null }
+
+    /**
+     * Connection duration in milliseconds.
+     * Computed from [connectedAt] timestamp.
+     */
+    val durationMs: Long
+        get() = System.currentTimeMillis() - connectedAt
 
     /**
      * Calculate the duration of the connection.

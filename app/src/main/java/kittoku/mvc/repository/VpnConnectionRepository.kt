@@ -3,11 +3,11 @@ package kittoku.mvc.repository
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import kittoku.mvc.connection.ConnectionState
+import kittoku.mvc.connection.ConnectionStats
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.getBooleanPrefValue
 import kittoku.mvc.preference.accessor.setBooleanPrefValue
-import kittoku.mvc.service.contract.ConnectionState
-import kittoku.mvc.service.contract.ConnectionStats
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,9 +68,9 @@ class VpnConnectionRepository(private val context: Context) {
                 ConnectionState.Connected(
                     stats =
                         ConnectionStats(
+                            connectedAt = System.currentTimeMillis(),
                             bytesSent = 0,
                             bytesReceived = 0,
-                            durationMs = 0,
                             isUdpAccelerated = false,
                         ),
                 )
@@ -117,12 +117,12 @@ class VpnConnectionRepository(private val context: Context) {
             ConnectionState.Connected(
                 stats =
                     ConnectionStats(
+                        connectedAt = System.currentTimeMillis(),
                         bytesSent = 0,
                         bytesReceived = 0,
-                        durationMs = 0,
                         isUdpAccelerated = false,
-                        assignedIpAddress = assignedIp,
-                        serverHostname = serverIp,
+                        assignedIp = assignedIp,
+                        serverAddress = serverIp,
                     ),
             )
         updateConnectionState(state)

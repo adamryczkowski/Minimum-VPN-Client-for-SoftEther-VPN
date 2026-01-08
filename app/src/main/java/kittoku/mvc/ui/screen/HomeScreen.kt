@@ -40,8 +40,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kittoku.mvc.R
-import kittoku.mvc.service.contract.ConnectionState
-import kittoku.mvc.service.contract.ConnectionStats
+import kittoku.mvc.connection.ConnectionState
+import kittoku.mvc.connection.ConnectionStats
 import kittoku.mvc.ui.theme.VpnConnected
 import kittoku.mvc.ui.theme.VpnConnecting
 import kittoku.mvc.ui.theme.VpnDisconnected

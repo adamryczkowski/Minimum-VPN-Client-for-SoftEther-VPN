@@ -3,8 +3,8 @@ package kittoku.mvc.service
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
+import kittoku.mvc.connection.ConnectionState
 import kittoku.mvc.repository.VpnConnectionRepository
-import kittoku.mvc.service.contract.ConnectionState
 
 /**
  * Manager class for VPN connection operations.
