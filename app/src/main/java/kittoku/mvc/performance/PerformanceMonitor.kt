@@ -1,5 +1,6 @@
 package kittoku.mvc.performance
 
+import kittoku.mvc.extension.Formatting
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -230,27 +231,13 @@ class PerformanceMonitor {
                 }
 
         val uptimeFormatted: String
-            get() {
-                val seconds = (uptimeMs / 1000) % 60
-                val minutes = (uptimeMs / (1000 * 60)) % 60
-                val hours = uptimeMs / (1000 * 60 * 60)
-                return String.format("%02d:%02d:%02d", hours, minutes, seconds)
-            }
+            get() = Formatting.formatDuration(uptimeMs)
 
         val bytesSentFormatted: String
-            get() = formatBytes(bytesSent)
+            get() = Formatting.formatBytesDecimal(bytesSent)
 
         val bytesReceivedFormatted: String
-            get() = formatBytes(bytesReceived)
-
-        private fun formatBytes(bytes: Long): String {
-            return when {
-                bytes >= 1_000_000_000 -> String.format("%.2f GB", bytes / 1_000_000_000.0)
-                bytes >= 1_000_000 -> String.format("%.2f MB", bytes / 1_000_000.0)
-                bytes >= 1_000 -> String.format("%.2f KB", bytes / 1_000.0)
-                else -> "$bytes B"
-            }
-        }
+            get() = Formatting.formatBytesDecimal(bytesReceived)
 
         override fun toString(): String {
             return buildString {

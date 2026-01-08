@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import kittoku.mvc.R
 import kittoku.mvc.connection.ConnectionState
 import kittoku.mvc.connection.ConnectionStats
+import kittoku.mvc.extension.Formatting
 import kittoku.mvc.ui.theme.VpnConnected
 import kittoku.mvc.ui.theme.VpnConnecting
 import kittoku.mvc.ui.theme.VpnDisconnected
@@ -303,17 +304,17 @@ private fun ConnectionStatsCard(
 
             StatRow(
                 label = stringResource(R.string.data_sent),
-                value = formatBytes(stats.bytesSent),
+                value = Formatting.formatBytes(stats.bytesSent),
             )
 
             StatRow(
                 label = stringResource(R.string.data_received),
-                value = formatBytes(stats.bytesReceived),
+                value = Formatting.formatBytes(stats.bytesReceived),
             )
 
             StatRow(
                 label = stringResource(R.string.duration),
-                value = formatDuration(stats.durationMs),
+                value = Formatting.formatDurationShort(stats.durationMs),
             )
 
             if (stats.isUdpAccelerated) {
@@ -368,21 +369,3 @@ private fun getStatusDescription(state: ConnectionState): String =
         is ConnectionState.Error -> state.message
         is ConnectionState.Disconnected -> "Tap Connect to start VPN"
     }
-
-private fun formatBytes(bytes: Long): String =
-    when {
-        bytes < 1024 -> "$bytes B"
-        bytes < 1024 * 1024 -> String.format("%.1f KB", bytes / 1024.0)
-        bytes < 1024 * 1024 * 1024 -> String.format("%.1f MB", bytes / (1024.0 * 1024))
-        else -> String.format("%.2f GB", bytes / (1024.0 * 1024 * 1024))
-    }
-
-private fun formatDuration(durationMs: Long): String {
-    val seconds = durationMs / 1000
-    val minutes = seconds / 60
-    val hours = minutes / 60
-    return when {
-        hours > 0 -> String.format("%d:%02d:%02d", hours, minutes % 60, seconds % 60)
-        else -> String.format("%d:%02d", minutes, seconds % 60)
-    }
-}

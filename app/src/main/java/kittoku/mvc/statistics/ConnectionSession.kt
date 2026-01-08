@@ -2,6 +2,7 @@ package kittoku.mvc.statistics
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kittoku.mvc.extension.Formatting
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,34 +66,28 @@ data class ConnectionSession(
      *
      * @return Formatted duration string
      */
-    fun getFormattedDuration(): String {
-        val totalSeconds = durationSeconds
-        val hours = totalSeconds / 3600
-        val minutes = (totalSeconds % 3600) / 60
-        val seconds = totalSeconds % 60
-        return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
-    }
+    fun getFormattedDuration(): String = Formatting.formatDuration(durationMillis)
 
     /**
      * Get formatted bytes sent string.
      *
      * @return Human-readable bytes sent (e.g., "1.5 MB")
      */
-    fun getFormattedBytesSent(): String = formatBytes(bytesSent)
+    fun getFormattedBytesSent(): String = Formatting.formatBytes(bytesSent)
 
     /**
      * Get formatted bytes received string.
      *
      * @return Human-readable bytes received (e.g., "2.3 GB")
      */
-    fun getFormattedBytesReceived(): String = formatBytes(bytesReceived)
+    fun getFormattedBytesReceived(): String = Formatting.formatBytes(bytesReceived)
 
     /**
      * Get formatted total bytes string.
      *
      * @return Human-readable total bytes (e.g., "3.8 GB")
      */
-    fun getFormattedTotalBytes(): String = formatBytes(totalBytes)
+    fun getFormattedTotalBytes(): String = Formatting.formatBytes(totalBytes)
 
     /**
      * Get the start date formatted for display.
@@ -125,15 +120,6 @@ data class ConnectionSession(
     fun getFormattedStartDateTime(locale: Locale = Locale.getDefault()): String {
         val dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, locale)
         return dateTimeFormat.format(Date(startTime))
-    }
-
-    private fun formatBytes(bytes: Long): String {
-        return when {
-            bytes < 1024 -> "$bytes B"
-            bytes < 1024 * 1024 -> String.format(Locale.US, "%.1f KB", bytes / 1024.0)
-            bytes < 1024 * 1024 * 1024 -> String.format(Locale.US, "%.1f MB", bytes / (1024.0 * 1024))
-            else -> String.format(Locale.US, "%.1f GB", bytes / (1024.0 * 1024 * 1024))
-        }
     }
 
     companion object {

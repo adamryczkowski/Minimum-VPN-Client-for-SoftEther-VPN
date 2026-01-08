@@ -1,9 +1,9 @@
 package kittoku.mvc.statistics
 
+import kittoku.mvc.extension.Formatting
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.Locale
 
 /**
  * Timer for tracking VPN connection duration.
@@ -116,18 +116,7 @@ class ConnectionTimer {
      *
      * @return Formatted duration string (e.g., "01:23:45")
      */
-    fun getFormattedDuration(): String {
-        val totalSeconds = elapsedSeconds
-        val hours = totalSeconds / 3600
-        val minutes = (totalSeconds % 3600) / 60
-        val seconds = totalSeconds % 60
-
-        return if (hours < 100) {
-            String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds)
-        }
-    }
+    fun getFormattedDuration(): String = Formatting.formatDuration(elapsedMillis)
 
     /**
      * Get a compact duration string.
@@ -138,18 +127,7 @@ class ConnectionTimer {
      *
      * @return Compact duration string
      */
-    fun getCompactDuration(): String {
-        val totalSeconds = elapsedSeconds
-        val hours = totalSeconds / 3600
-        val minutes = (totalSeconds % 3600) / 60
-        val seconds = totalSeconds % 60
-
-        return when {
-            hours > 0 -> "${hours}h ${minutes}m"
-            minutes > 0 -> "${minutes}m ${seconds}s"
-            else -> "${seconds}s"
-        }
-    }
+    fun getCompactDuration(): String = Formatting.formatDurationCompact(elapsedMillis)
 
     private fun updateDurationFlow() {
         _durationFlow.value = elapsedMillis

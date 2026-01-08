@@ -2,6 +2,7 @@ package kittoku.mvc.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kittoku.mvc.extension.Formatting
 import kittoku.mvc.statistics.AggregateStatistics
 import kittoku.mvc.statistics.ConnectionSession
 import kittoku.mvc.statistics.ConnectionTimer
@@ -142,39 +143,15 @@ class StatisticsViewModel(
     /**
      * Get formatted current traffic sent.
      */
-    fun getFormattedBytesSent(): String {
-        return formatBytes(currentTraffic.value.bytesSent)
-    }
+    fun getFormattedBytesSent(): String = Formatting.formatBytes(currentTraffic.value.bytesSent)
 
     /**
      * Get formatted current traffic received.
      */
-    fun getFormattedBytesReceived(): String {
-        return formatBytes(currentTraffic.value.bytesReceived)
-    }
+    fun getFormattedBytesReceived(): String = Formatting.formatBytes(currentTraffic.value.bytesReceived)
 
     /**
      * Get formatted current duration.
      */
-    fun getFormattedDuration(): String {
-        val totalSeconds = currentDuration.value / 1000
-        val hours = totalSeconds / 3600
-        val minutes = (totalSeconds % 3600) / 60
-        val seconds = totalSeconds % 60
-        return String.format(java.util.Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
-    }
-
-    private fun formatBytes(bytes: Long): String {
-        return when {
-            bytes < 1024 -> "$bytes B"
-            bytes < 1024 * 1024 -> String.format(java.util.Locale.US, "%.1f KB", bytes / 1024.0)
-            bytes < 1024 * 1024 * 1024 ->
-                String.format(
-                    java.util.Locale.US,
-                    "%.1f MB",
-                    bytes / (1024.0 * 1024),
-                )
-            else -> String.format(java.util.Locale.US, "%.1f GB", bytes / (1024.0 * 1024 * 1024))
-        }
-    }
+    fun getFormattedDuration(): String = Formatting.formatDuration(currentDuration.value)
 }

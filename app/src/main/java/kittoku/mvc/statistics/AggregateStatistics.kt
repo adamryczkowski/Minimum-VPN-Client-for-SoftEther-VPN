@@ -1,5 +1,6 @@
 package kittoku.mvc.statistics
 
+import kittoku.mvc.extension.Formatting
 import java.util.Locale
 
 /**
@@ -51,43 +52,28 @@ data class AggregateStatistics(
     /**
      * Get formatted total bytes sent.
      */
-    fun getFormattedBytesSent(): String = formatBytes(totalBytesSent)
+    fun getFormattedBytesSent(): String = Formatting.formatBytes(totalBytesSent)
 
     /**
      * Get formatted total bytes received.
      */
-    fun getFormattedBytesReceived(): String = formatBytes(totalBytesReceived)
+    fun getFormattedBytesReceived(): String = Formatting.formatBytes(totalBytesReceived)
 
     /**
      * Get formatted total bytes.
      */
-    fun getFormattedTotalBytes(): String = formatBytes(totalBytes)
+    fun getFormattedTotalBytes(): String = Formatting.formatBytes(totalBytes)
 
     /**
      * Get formatted total duration as HH:MM:SS.
      */
-    fun getFormattedDuration(): String {
-        val totalSeconds = totalDurationSeconds
-        val hours = totalSeconds / 3600
-        val minutes = (totalSeconds % 3600) / 60
-        val seconds = totalSeconds % 60
-        return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
-    }
+    fun getFormattedDuration(): String = Formatting.formatDuration(totalDurationMillis)
 
     /**
      * Get formatted success rate as percentage.
      */
     fun getFormattedSuccessRate(): String {
         return String.format(Locale.US, "%.1f%%", successRate * 100)
-    }
-
-    private fun formatBytes(bytes: Long): String {
-        return when {
-            bytes < 1024 -> "$bytes B"
-            bytes < 1024 * 1024 -> String.format(Locale.US, "%.1f KB", bytes / 1024.0)
-            bytes < 1024 * 1024 * 1024 -> String.format(Locale.US, "%.1f MB", bytes / (1024.0 * 1024))
-            else -> String.format(Locale.US, "%.1f GB", bytes / (1024.0 * 1024 * 1024))
-        }
     }
 
     companion object {
