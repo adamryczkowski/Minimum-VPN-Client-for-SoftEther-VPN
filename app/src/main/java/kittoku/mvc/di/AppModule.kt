@@ -11,10 +11,14 @@ import kittoku.mvc.autoconnect.WifiSsidProvider
 import kittoku.mvc.autoconnect.WifiSsidProviderImpl
 import kittoku.mvc.connection.ConnectionStateManager
 import kittoku.mvc.database.AppDatabase
+import kittoku.mvc.logging.DiagnosticExporter
 import kittoku.mvc.notification.VpnNotificationManager
+import kittoku.mvc.performance.BatteryOptimizer
+import kittoku.mvc.performance.PerformanceMonitor
 import kittoku.mvc.repository.ProfileRepository
 import kittoku.mvc.repository.ProfileRepositoryImpl
 import kittoku.mvc.repository.VpnConnectionRepository
+import kittoku.mvc.security.SecureCredentialStorage
 import kittoku.mvc.service.ProfileImportExportService
 import kittoku.mvc.service.ProfileImportExportServiceImpl
 import kittoku.mvc.service.VpnConnectionManager
@@ -85,6 +89,25 @@ val appModule =
 
         // Connection timer (singleton for current session)
         single { ConnectionTimer() }
+
+        // === Security Layer ===
+        // Secure credential storage (singleton)
+        // Uses EncryptedSharedPreferences for secure storage of passwords and certificates
+        single { SecureCredentialStorage(androidContext()) }
+
+        // === Performance Layer ===
+        // Battery optimizer (singleton)
+        // Provides battery-aware VPN configuration based on device state
+        single { BatteryOptimizer(androidContext()) }
+
+        // Performance monitor (singleton)
+        // Tracks throughput, latency, and resource usage
+        single { PerformanceMonitor.getInstance() }
+
+        // === Logging & Diagnostics Layer ===
+        // Diagnostic exporter (singleton)
+        // Exports diagnostic information for troubleshooting
+        single { DiagnosticExporter(androidContext()) }
 
         // === Auto-Connect Layer ===
         // SharedPreferences for auto-connect settings
