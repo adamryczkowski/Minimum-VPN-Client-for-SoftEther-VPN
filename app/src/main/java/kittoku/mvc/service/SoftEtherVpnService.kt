@@ -12,6 +12,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import kittoku.mvc.R
+import kittoku.mvc.notification.VpnNotificationManager
 import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlClient
 import kittoku.mvc.splittunnel.InstalledAppsProviderImpl
@@ -76,14 +77,19 @@ internal class SoftEtherVpnService : VpnService() {
     }
 
     private fun beForegrounded() {
-        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+        val channel =
+            NotificationChannel(
+                VpnNotificationManager.CHANNEL_ID,
+                VpnNotificationManager.CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
         val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
         val intent = Intent(this, SoftEtherVpnService::class.java).setAction(ACTION_VPN_DISCONNECT)
         val pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         val builder =
-            NotificationCompat.Builder(this, CHANNEL_ID).also {
+            NotificationCompat.Builder(this, VpnNotificationManager.CHANNEL_ID).also {
                 it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
                 it.setContentText("Disconnect SoftEther VPN connection")
                 it.priority = NotificationCompat.PRIORITY_DEFAULT
