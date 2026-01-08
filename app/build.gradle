@@ -163,10 +163,6 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.junit5}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.junit5}"
 
-    // JUnit 4 support for legacy tests (can be removed after migration)
-    testImplementation 'junit:junit:4.13.2'
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${versions.junit5}"
-
     // MockK - Kotlin mocking library
     testImplementation "io.mockk:mockk:${versions.mockk}"
 

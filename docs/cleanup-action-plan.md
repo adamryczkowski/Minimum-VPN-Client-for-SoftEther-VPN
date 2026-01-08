@@ -384,30 +384,40 @@ This would require a separate detailed migration plan.
 
 ---
 
-## Milestone 9: Review JUnit 4 Dependency (LOW)
+## Milestone 9: Review JUnit 4 Dependency (LOW) ✅ COMPLETED
 
 **Goal:** Remove unnecessary JUnit 4 dependency if not used.
 
 **Estimated Effort:** 0.5 days
 
+**Status:** Completed on 8th January 2025
+
 ### 9.1 Verify JUnit 4 Usage
 
-**Command to Run:**
+**Verification Performed:**
 
 ```bash
-rg "import org.junit.Test" app/src/test --type kotlin
-rg "import org.junit.Before" app/src/test --type kotlin
-rg "@RunWith" app/src/test --type kotlin
+rg "import org.junit.Test" app/src/test --type kotlin  # No results
+rg "import org.junit.Before" app/src/test --type kotlin  # No results
+rg "@RunWith" app/src/test --type kotlin  # No results
 ```
 
-### 9.2 If No JUnit 4 Tests Found
+All unit tests in `app/src/test/` use JUnit 5 (`org.junit.jupiter`) exclusively.
 
-**Changes Required:**
+**Note:** The `app/src/androidTest/` folder uses JUnit 4 annotations, but these are provided by `androidx.test.ext:junit` (for instrumented tests), not by the `junit:junit:4.13.2` dependency.
+
+### 9.2 Changes Made
 
 | File | Change |
 |------|--------|
-| `app/build.gradle` | Remove `testImplementation 'junit:junit:4.13.2'` |
-| `app/build.gradle` | Remove `testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${versions.junit5}"` |
+| [`app/build.gradle`](../app/build.gradle) | Removed `testImplementation 'junit:junit:4.13.2'` |
+| [`app/build.gradle`](../app/build.gradle) | Removed `testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${versions.junit5}"` |
+
+**Validation Criteria:**
+
+- [x] No JUnit 4 imports in unit tests (`app/src/test/`)
+- [x] JUnit 4 dependencies removed from `app/build.gradle`
+- [x] Instrumented tests unaffected (use `androidx.test.ext:junit`)
 
 ---
 
