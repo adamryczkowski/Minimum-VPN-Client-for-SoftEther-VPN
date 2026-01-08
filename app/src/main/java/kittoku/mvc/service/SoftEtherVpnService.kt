@@ -1,17 +1,11 @@
 package kittoku.mvc.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.net.VpnService
 import android.os.Build
-import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
-import kittoku.mvc.R
 import kittoku.mvc.notification.VpnNotificationManager
 import kittoku.mvc.service.client.ClientBridge
 import kittoku.mvc.service.client.ControlClient
@@ -27,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 
 internal class SoftEtherVpnService : VpnService() {
     private var client: ControlClient? = null
+    private var notificationManager: VpnNotificationManager? = null
 
     override fun onStartCommand(
         intent: Intent?,
@@ -77,30 +72,17 @@ internal class SoftEtherVpnService : VpnService() {
     }
 
     private fun beForegrounded() {
-        val channel =
-            NotificationChannel(
-                VpnNotificationManager.CHANNEL_ID,
-                VpnNotificationManager.CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_DEFAULT,
-            )
-        val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
-        val intent = Intent(this, SoftEtherVpnService::class.java).setAction(ACTION_VPN_DISCONNECT)
-        val pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-        val builder =
-            NotificationCompat.Builder(this, VpnNotificationManager.CHANNEL_ID).also {
-                it.setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
-                it.setContentText("Disconnect SoftEther VPN connection")
-                it.priority = NotificationCompat.PRIORITY_DEFAULT
-                it.setContentIntent(pendingIntent)
-                it.setAutoCancel(true)
-            }
+        notificationManager = VpnNotificationManager(this)
+        val notification = notificationManager!!.buildForegroundNotification(SoftEtherVpnService::class.java)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(1, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED)
+            startForeground(
+                VpnNotificationManager.NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED,
+            )
         } else {
-            startForeground(1, builder.build())
+            startForeground(VpnNotificationManager.NOTIFICATION_ID, notification)
         }
     }
 

@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import kittoku.mvc.MainActivity
 import kittoku.mvc.R
 import kittoku.mvc.connection.ConnectionState
+import kittoku.mvc.service.ACTION_VPN_DISCONNECT
 
 /**
  * Manager for VPN connection notifications.
@@ -82,6 +83,39 @@ class VpnNotificationManager(
      */
     fun cancelNotification() {
         notificationManager.cancel(NOTIFICATION_ID)
+    }
+
+    /**
+     * Build a foreground notification for the VPN service.
+     *
+     * This notification is specifically designed for use with [android.app.Service.startForeground].
+     * It includes a disconnect action that sends an intent to the VPN service.
+     *
+     * @param serviceClass The VPN service class to send the disconnect intent to
+     * @return Built notification suitable for foreground service
+     */
+    fun buildForegroundNotification(serviceClass: Class<out android.app.Service>): Notification {
+        val disconnectIntent =
+            Intent(context, serviceClass).apply {
+                action = ACTION_VPN_DISCONNECT
+            }
+        val pendingIntent =
+            PendingIntent.getService(
+                context,
+                0,
+                disconnectIntent,
+                PendingIntent.FLAG_IMMUTABLE,
+            )
+
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_baseline_vpn_lock_24)
+            .setContentTitle("VPN Connected")
+            .setContentText("Disconnect SoftEther VPN connection")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setOngoing(true)
+            .build()
     }
 
     private fun buildNotificationFromContent(content: VpnNotificationContent): Notification {

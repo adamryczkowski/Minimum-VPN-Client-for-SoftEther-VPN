@@ -296,6 +296,34 @@ class VpnNotificationContentTest {
         }
     }
 
+    @Nested
+    @DisplayName("VpnNotificationManager constants")
+    inner class VpnNotificationManagerConstants {
+        @Test
+        @DisplayName("should have correct notification ID")
+        fun shouldHaveCorrectNotificationId() {
+            assertThat(VpnNotificationManager.NOTIFICATION_ID).isEqualTo(1)
+        }
+
+        @Test
+        @DisplayName("should have correct channel ID")
+        fun shouldHaveCorrectChannelId() {
+            assertThat(VpnNotificationManager.CHANNEL_ID).isEqualTo("vpn_connection_channel")
+        }
+
+        @Test
+        @DisplayName("should have correct channel name")
+        fun shouldHaveCorrectChannelName() {
+            assertThat(VpnNotificationManager.CHANNEL_NAME).isEqualTo("VPN Connection")
+        }
+
+        @Test
+        @DisplayName("should have correct channel description")
+        fun shouldHaveCorrectChannelDescription() {
+            assertThat(VpnNotificationManager.CHANNEL_DESCRIPTION).isEqualTo("Shows VPN connection status")
+        }
+    }
+
     private fun createTestStats(): ConnectionStats =
         ConnectionStats(
             connectedAt = System.currentTimeMillis(),
