@@ -148,36 +148,3 @@ val appModule =
         // Split tunnel ViewModel
         viewModel { SplitTunnelViewModel(get(), get()) }
     }
-
-/**
- * Module for network-related dependencies.
- *
- * Contains terminal implementations and network utilities.
- */
-val networkModule =
-    module {
-        // Network terminals will be added here when refactored
-        // factory { TCPTerminal(get()) }
-        // factory { UDPTerminal(get()) }
-        // factory { IPTerminal(get()) }
-    }
-
-/**
- * Module for protocol handlers.
- *
- * Contains SoftEther, DHCP, and ARP protocol implementations.
- */
-val protocolModule =
-    module {
-        // Protocol handlers will be added here when refactored
-        // factory { SoftEtherClient(get()) }
-        // factory { DhcpClient(get()) }
-        // factory { ARPClient(get()) }
-    }
-
-/**
- * All application modules combined.
- *
- * Use this when starting Koin to load all modules at once.
- */
-val allModules = listOf(appModule, networkModule, protocolModule)

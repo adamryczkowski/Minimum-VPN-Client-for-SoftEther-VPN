@@ -8,10 +8,10 @@ import kittoku.mvc.debug.ErrorCode
 import kittoku.mvc.debug.MvcException
 import kittoku.mvc.debug.assertAlways
 import kittoku.mvc.extension.*
+import kittoku.mvc.notification.VpnNotificationManager.Companion.CHANNEL_ID
 import kittoku.mvc.preference.MvcPreference
 import kittoku.mvc.preference.accessor.setBooleanPrefValue
 import kittoku.mvc.preference.accessor.setStringPrefValue
-import kittoku.mvc.service.CHANNEL_ID
 import kittoku.mvc.service.client.arp.ARPClient
 import kittoku.mvc.service.client.dhcp.DhcpClient
 import kittoku.mvc.service.client.softether.SoftEtherClient
