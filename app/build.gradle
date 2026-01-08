@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'org.jetbrains.kotlin.plugin.compose'
     id 'com.google.devtools.ksp'
     id 'org.jlleitschuh.gradle.ktlint'
     id 'io.gitlab.arturbosch.detekt'
@@ -91,7 +90,6 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
-        compose true
     }
 
     testOptions {
@@ -121,10 +119,6 @@ def versions = [
     lifecycle: '2.10.0',
     room: '2.8.4',
     serialization: '1.9.0',
-    composeBom: '2025.12.01',
-    activityCompose: '1.10.1',
-    navigationCompose: '2.9.0',
-    koinCompose: '4.0.0',
     encryptedPrefs: '1.1.1', // ed-george/encrypted-shared-preferences fork
 ]
 
@@ -162,55 +156,6 @@ dependencies {
     implementation "io.insert-koin:koin-android:${versions.koin}"
     testImplementation "io.insert-koin:koin-test:${versions.koin}"
     testImplementation "io.insert-koin:koin-test-junit5:${versions.koin}"
-
-    // === Jetpack Compose ===
-    // Compose BOM (Bill of Materials) - manages all Compose library versions
-    def composeBom = platform("androidx.compose:compose-bom:${versions.composeBom}")
-    implementation composeBom
-    androidTestImplementation composeBom
-
-    // Compose UI
-    implementation 'androidx.compose.ui:ui'
-    implementation 'androidx.compose.ui:ui-graphics'
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    debugImplementation 'androidx.compose.ui:ui-tooling'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest'
-
-    // Material Design 3
-    implementation 'androidx.compose.material3:material3'
-    implementation 'androidx.compose.material3:material3-window-size-class'
-
-    // Material Icons
-    implementation 'androidx.compose.material:material-icons-core'
-    implementation 'androidx.compose.material:material-icons-extended'
-
-    // Compose Foundation
-    implementation 'androidx.compose.foundation:foundation'
-    implementation 'androidx.compose.foundation:foundation-layout'
-
-    // Compose Animation
-    implementation 'androidx.compose.animation:animation'
-    implementation 'androidx.compose.animation:animation-graphics'
-
-    // Compose Runtime
-    implementation 'androidx.compose.runtime:runtime'
-    implementation 'androidx.compose.runtime:runtime-livedata'
-
-    // Activity Compose integration
-    implementation "androidx.activity:activity-compose:${versions.activityCompose}"
-
-    // Navigation Compose
-    implementation "androidx.navigation:navigation-compose:${versions.navigationCompose}"
-
-    // Lifecycle Compose integration
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:${versions.lifecycle}"
-    implementation "androidx.lifecycle:lifecycle-runtime-compose:${versions.lifecycle}"
-
-    // Koin Compose integration
-    implementation "io.insert-koin:koin-androidx-compose:${versions.koinCompose}"
-
-    // Compose UI Testing
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
 
     // === Unit Testing ===
     // JUnit 5
