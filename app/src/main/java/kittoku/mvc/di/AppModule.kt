@@ -63,7 +63,8 @@ val appModule =
 
         // === Repository Layer ===
         // VPN connection state repository (singleton)
-        single { VpnConnectionRepository(androidContext()) }
+        // Delegates to ConnectionStateManager as the single source of truth
+        single { VpnConnectionRepository(androidContext(), get()) }
 
         // Profile repository (singleton)
         single<ProfileRepository> { ProfileRepositoryImpl(get()) }

@@ -4,107 +4,105 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import kittoku.mvc.connection.ConnectionState
+import kittoku.mvc.connection.ConnectionStateManager
 import kittoku.mvc.connection.ConnectionStats
 import kittoku.mvc.preference.MvcPreference
-import kittoku.mvc.preference.accessor.getBooleanPrefValue
 import kittoku.mvc.preference.accessor.setBooleanPrefValue
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Repository for VPN connection state management.
  *
- * This class separates the connection state management from the UI layer,
- * providing a clean interface for observing and modifying connection state.
+ * This class delegates to [ConnectionStateManager] as the single source of truth
+ * for connection state, while also synchronizing with SharedPreferences for
+ * UI binding with the preference-based UI components.
  *
  * @property context Application context for accessing SharedPreferences
+ * @property stateManager The single source of truth for connection state
  */
-class VpnConnectionRepository(private val context: Context) {
+class VpnConnectionRepository(
+    private val context: Context,
+    private val stateManager: ConnectionStateManager,
+) {
     private val sharedPreferences: SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
 
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     /**
      * Observable connection state as a StateFlow.
      * UI components can collect this flow to react to state changes.
+     * Delegates to [ConnectionStateManager] as the single source of truth.
      */
-    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
-
-    private val _isConnected = MutableStateFlow(false)
+    val connectionState: StateFlow<ConnectionState> = stateManager.state
 
     /**
      * Simple boolean indicating if VPN is currently connected.
-     * This is derived from the HOME_CONNECTOR preference.
+     * Derived from the connection state.
      */
-    val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
-
-    private val preferenceListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-            if (key == MvcPreference.HOME_CONNECTOR.name) {
-                val connected = getBooleanPrefValue(MvcPreference.HOME_CONNECTOR, prefs)
-                _isConnected.value = connected
-                updateConnectionStateFromPreference(connected)
-            }
+    val isConnected: StateFlow<Boolean> =
+        runBlocking {
+            stateManager.state
+                .map { it.isConnected }
+                .stateIn(repositoryScope)
         }
 
     init {
-        // Initialize with current preference value
-        val currentValue = getBooleanPrefValue(MvcPreference.HOME_CONNECTOR, sharedPreferences)
-        _isConnected.value = currentValue
-        updateConnectionStateFromPreference(currentValue)
-
-        // Register listener for preference changes
-        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceListener)
+        // Synchronize SharedPreferences with state changes from ConnectionStateManager
+        repositoryScope.launch {
+            stateManager.state.collect { state ->
+                syncPreferenceWithState(state)
+            }
+        }
     }
 
     /**
-     * Updates the connection state based on the preference value.
+     * Synchronizes the HOME_CONNECTOR preference with the current state.
+     * This keeps the preference-based UI in sync with the actual state.
      */
-    private fun updateConnectionStateFromPreference(connected: Boolean) {
-        _connectionState.value =
-            if (connected) {
-                ConnectionState.Connected(
-                    stats =
-                        ConnectionStats(
-                            connectedAt = System.currentTimeMillis(),
-                            bytesSent = 0,
-                            bytesReceived = 0,
-                            isUdpAccelerated = false,
-                        ),
-                )
-            } else {
-                ConnectionState.Disconnected
-            }
+    private fun syncPreferenceWithState(state: ConnectionState) {
+        val isConnected = state is ConnectionState.Connected
+        setBooleanPrefValue(isConnected, MvcPreference.HOME_CONNECTOR, sharedPreferences)
     }
 
     /**
      * Updates the connection state.
      * Called by the VPN service to report state changes.
+     * Delegates to [ConnectionStateManager].
      *
      * @param state The new connection state
      */
     fun updateConnectionState(state: ConnectionState) {
-        _connectionState.value = state
-
-        // Update the preference based on connection state
-        val isConnected = state is ConnectionState.Connected
-        setBooleanPrefValue(isConnected, MvcPreference.HOME_CONNECTOR, sharedPreferences)
-        _isConnected.value = isConnected
+        when (state) {
+            is ConnectionState.Disconnected -> stateManager.setDisconnected()
+            is ConnectionState.Connecting -> stateManager.startConnecting(state.step, state.progress)
+            is ConnectionState.Connected -> stateManager.setConnected(state.stats)
+            is ConnectionState.Disconnecting -> stateManager.startDisconnecting()
+            is ConnectionState.Error -> stateManager.setError(state.message, state.cause, state.isRecoverable)
+        }
     }
 
     /**
      * Sets the connecting state with a step description.
+     * Delegates to [ConnectionStateManager].
      *
      * @param step Description of the current connection step
      */
     fun setConnecting(step: String) {
-        _connectionState.value = ConnectionState.Connecting(step)
+        stateManager.startConnecting(step)
     }
 
     /**
      * Sets the connected state with connection details.
+     * Delegates to [ConnectionStateManager].
      *
      * @param assignedIp The IP address assigned to the VPN client
      * @param serverIp The IP address of the VPN server
@@ -113,30 +111,29 @@ class VpnConnectionRepository(private val context: Context) {
         assignedIp: String,
         serverIp: String,
     ) {
-        val state =
-            ConnectionState.Connected(
-                stats =
-                    ConnectionStats(
-                        connectedAt = System.currentTimeMillis(),
-                        bytesSent = 0,
-                        bytesReceived = 0,
-                        isUdpAccelerated = false,
-                        assignedIp = assignedIp,
-                        serverAddress = serverIp,
-                    ),
+        val stats =
+            ConnectionStats(
+                connectedAt = System.currentTimeMillis(),
+                bytesSent = 0,
+                bytesReceived = 0,
+                isUdpAccelerated = false,
+                assignedIp = assignedIp,
+                serverAddress = serverIp,
             )
-        updateConnectionState(state)
+        stateManager.setConnected(stats)
     }
 
     /**
      * Sets the disconnected state.
+     * Delegates to [ConnectionStateManager].
      */
     fun setDisconnected() {
-        updateConnectionState(ConnectionState.Disconnected)
+        stateManager.setDisconnected()
     }
 
     /**
      * Sets the error state with an error message.
+     * Delegates to [ConnectionStateManager].
      *
      * @param message The error message
      * @param cause Optional throwable that caused the error
@@ -145,15 +142,13 @@ class VpnConnectionRepository(private val context: Context) {
         message: String,
         cause: Throwable? = null,
     ) {
-        _connectionState.value = ConnectionState.Error(message, cause)
-        _isConnected.value = false
-        setBooleanPrefValue(false, MvcPreference.HOME_CONNECTOR, sharedPreferences)
+        stateManager.setError(message, cause)
     }
 
     /**
      * Cleans up resources when the repository is no longer needed.
      */
     fun cleanup() {
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceListener)
+        repositoryScope.cancel()
     }
 }

@@ -240,6 +240,59 @@ class ConnectionStateManagerTest {
             }
     }
 
+    @Nested
+    @DisplayName("Single source of truth behavior")
+    inner class SingleSourceOfTruth {
+        @Test
+        @DisplayName("should be usable as the single source of truth for connection state")
+        fun shouldBeUsableAsSingleSourceOfTruth() =
+            runTest {
+                // Verify that the state manager can be used as the single source of truth
+                // by multiple consumers observing the same state
+
+                // Initial state
+                assertThat(stateManager.state.first()).isEqualTo(ConnectionState.Disconnected)
+                assertThat(stateManager.currentState).isEqualTo(ConnectionState.Disconnected)
+
+                // State changes are immediately visible
+                stateManager.startConnecting("Step 1")
+                assertThat(stateManager.state.first()).isInstanceOf(ConnectionState.Connecting::class.java)
+                assertThat(stateManager.currentState).isInstanceOf(ConnectionState.Connecting::class.java)
+
+                // Connected state with stats
+                val stats = createTestStats()
+                stateManager.setConnected(stats)
+                assertThat(stateManager.state.first()).isInstanceOf(ConnectionState.Connected::class.java)
+                assertThat((stateManager.currentState as ConnectionState.Connected).stats).isEqualTo(stats)
+            }
+
+        @Test
+        @DisplayName("should maintain state consistency across multiple operations")
+        fun shouldMaintainStateConsistencyAcrossMultipleOperations() =
+            runTest {
+                // Simulate a typical connection lifecycle
+                stateManager.startConnecting("Initializing")
+                assertThat(stateManager.currentState.isConnecting).isTrue()
+
+                stateManager.updateConnectingStep("Establishing SSL")
+                assertThat((stateManager.currentState as ConnectionState.Connecting).step)
+                    .isEqualTo("Establishing SSL")
+
+                stateManager.updateConnectingProgress(50)
+                assertThat((stateManager.currentState as ConnectionState.Connecting).progress)
+                    .isEqualTo(50)
+
+                stateManager.setConnected(createTestStats())
+                assertThat(stateManager.currentState.isConnected).isTrue()
+
+                stateManager.startDisconnecting()
+                assertThat(stateManager.currentState).isEqualTo(ConnectionState.Disconnecting)
+
+                stateManager.setDisconnected()
+                assertThat(stateManager.currentState).isEqualTo(ConnectionState.Disconnected)
+            }
+    }
+
     private fun createTestStats(): ConnectionStats =
         ConnectionStats(
             connectedAt = System.currentTimeMillis(),

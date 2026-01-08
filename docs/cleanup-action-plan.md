@@ -340,37 +340,47 @@ This would require a separate detailed migration plan.
 
 ---
 
-## Milestone 8: Consolidate State Management (MEDIUM)
+## Milestone 8: Consolidate State Management (MEDIUM) ✅ COMPLETED
 
 **Goal:** Establish a single source of truth for connection state.
 
 **Estimated Effort:** 2-3 days
 
+**Status:** Completed on 8th January 2025
+
 ### 8.1 Current State Analysis
 
-**Multiple State Sources:**
+**Multiple State Sources (Before):**
 
 1. [`ConnectionStateManager`](../app/src/main/java/kittoku/mvc/connection/ConnectionStateManager.kt) - Uses `kittoku.mvc.connection.ConnectionState`
-2. [`VpnConnectionRepository`](../app/src/main/java/kittoku/mvc/repository/VpnConnectionRepository.kt) - Uses `kittoku.mvc.service.contract.ConnectionState`
+2. [`VpnConnectionRepository`](../app/src/main/java/kittoku/mvc/repository/VpnConnectionRepository.kt) - Had its own `MutableStateFlow` and listened to `HOME_CONNECTOR` preference
 3. SharedPreferences via `HOME_CONNECTOR` preference
 
 ### 8.2 Consolidation Plan
 
 **Decision:** Use `ConnectionStateManager` as the single source of truth.
 
-**Changes Required:**
+**Changes Made:**
 
 | File | Change |
 |------|--------|
-| [`VpnConnectionRepository.kt`](../app/src/main/java/kittoku/mvc/repository/VpnConnectionRepository.kt) | Delegate to `ConnectionStateManager` |
-| Remove `HOME_CONNECTOR` preference usage for state | Use `ConnectionStateManager` instead |
+| [`VpnConnectionRepository.kt`](../app/src/main/java/kittoku/mvc/repository/VpnConnectionRepository.kt) | Now delegates to `ConnectionStateManager` for all state management. The repository exposes `ConnectionStateManager.state` directly as `connectionState`. SharedPreferences (`HOME_CONNECTOR`) is now synchronized from the state manager, not the other way around. |
+| [`AppModule.kt`](../app/src/main/java/kittoku/mvc/di/AppModule.kt) | Updated to inject `ConnectionStateManager` into `VpnConnectionRepository` |
 
 **Unit Tests:**
 
 | Test File | Test Cases |
 |-----------|------------|
-| [`ConnectionStateManagerTest.kt`](../app/src/test/java/kittoku/mvc/connection/ConnectionStateManagerTest.kt) | Verify single source of truth behavior |
-| Update: `VpnConnectionRepositoryTest.kt` | Verify delegation works correctly |
+| [`ConnectionStateManagerTest.kt`](../app/src/test/java/kittoku/mvc/connection/ConnectionStateManagerTest.kt) | Added "Single source of truth behavior" test nested class |
+| [`VpnConnectionRepositoryTest.kt`](../app/src/test/java/kittoku/mvc/repository/VpnConnectionRepositoryTest.kt) | New test file verifying delegation works correctly |
+
+**Validation Criteria:**
+
+- [x] `VpnConnectionRepository` delegates to `ConnectionStateManager`
+- [x] `ConnectionStateManager` is the single source of truth
+- [x] SharedPreferences (`HOME_CONNECTOR`) is synchronized from state manager
+- [x] Unit tests verify delegation behavior
+- [x] Unit tests verify single source of truth behavior
 
 ---
 
