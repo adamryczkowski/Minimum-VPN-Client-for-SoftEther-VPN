@@ -11,6 +11,7 @@ internal fun getIntPrefValue(
     val defaultValue =
         when (key) {
             MvcPreference.SSL_PORT -> 443
+            MvcPreference.SSL_CUSTOM_PORT -> 443
             MvcPreference.ETHERNET_MTU -> ETHERNET_MAX_MTU
             else -> throw NotImplementedError()
         }

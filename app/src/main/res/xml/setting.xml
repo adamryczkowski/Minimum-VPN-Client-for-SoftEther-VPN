@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="SSL Layer">
-        <kittoku.mvc.preference.custom.SslPortPreference android:key="SSL_PORT"/>
+        <kittoku.mvc.preference.custom.PortSelectionPreference android:key="SSL_PORT_SELECTION"/>
         <kittoku.mvc.preference.custom.SslVersionPreference android:key="SSL_VERSION"/>
         <kittoku.mvc.preference.custom.SslSkipVerifyPreference android:key="SSL_SKIP_VERIFY"/>
         <kittoku.mvc.preference.custom.SslDoSelectSuitesPreference android:key="SSL_DO_SELECT_SUITES"/>

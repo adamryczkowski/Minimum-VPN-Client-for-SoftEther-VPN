@@ -18,6 +18,7 @@ internal fun getStringPrefValue(
             MvcPreference.LOG_DIRECTORY,
             -> ""
             MvcPreference.SSL_VERSION -> "DEFAULT"
+            MvcPreference.SSL_PORT_SELECTION -> "443"
             else -> throw NotImplementedError()
         }
 

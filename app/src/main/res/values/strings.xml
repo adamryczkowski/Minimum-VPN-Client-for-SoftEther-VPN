@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SoftEther Connect</string>
-    <string name="app_name_short">SoftEther Connect</string>
+    <string name="app_name_short">SEC</string>
 
     <!-- Profile Management -->
     <string name="profiles">Profiles</string>

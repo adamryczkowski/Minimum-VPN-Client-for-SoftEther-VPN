@@ -8,6 +8,8 @@ internal enum class MvcPreference {
     HOME_CONNECTOR,
     HOME_STATUS,
     SSL_PORT,
+    SSL_PORT_SELECTION,
+    SSL_CUSTOM_PORT,
     SSL_VERSION,
     SSL_DO_SELECT_SUITES,
     SSL_SUITES,

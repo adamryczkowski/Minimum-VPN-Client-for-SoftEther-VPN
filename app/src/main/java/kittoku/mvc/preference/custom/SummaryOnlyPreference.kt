@@ -1,9 +1,12 @@
 package kittoku.mvc.preference.custom
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.AttributeSet
 import android.widget.TextView
+import android.widget.Toast
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import kittoku.mvc.preference.MvcPreference
@@ -53,7 +56,7 @@ internal abstract class SummaryOnlyPreference(context: Context, attrs: Attribute
 
 internal class EthernetMacAddressPreference(context: Context, attrs: AttributeSet) : SummaryOnlyPreference(context, attrs) {
     override val mvcPreference = MvcPreference.ETHERNET_MAC_ADDRESS
-    override val preferenceTitle = "MAC Address"
+    override val preferenceTitle = "MAC Address (long-press to copy)"
     override val summaryValue: String
         get() {
             val address = getStringPrefValue(mvcPreference, sharedPreferences!!)
@@ -64,6 +67,21 @@ internal class EthernetMacAddressPreference(context: Context, attrs: AttributeSe
                 address.chunked(2).joinToString(":")
             }
         }
+
+    override fun onBindViewHolder(holder: PreferenceViewHolder) {
+        super.onBindViewHolder(holder)
+
+        holder.itemView.setOnLongClickListener {
+            val macAddress = summaryValue
+            if (macAddress != "[No Address Assigned]") {
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("MAC Address", macAddress)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(context, "MAC Address copied to clipboard", Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
+    }
 }
 
 internal class AboutProjectPreference(context: Context, attrs: AttributeSet) : SummaryOnlyPreference(context, attrs) {
